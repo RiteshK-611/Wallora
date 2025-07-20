@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.tauri.app/config/2.1.0",
+  "productName": "Wallpaper Manager",
+  "version": "1.0.0",
+  "identifier": "com.wallpaper.manager",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "category": "Utility",
+    "shortDescription": "Modern wallpaper manager",
+    "longDescription": "A modern wallpaper manager with video and static image support"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Wallpaper Manager",
+        "width": 900,
+        "height": 700,
+        "minWidth": 600,
+        "minHeight": 400,
+        "visible": false,
+        "decorations": true,
+        "transparent": false,
+        "resizable": true,
+        "center": true
+      }
+    ],
+    "trayIcon": {
+      "id": "main-tray",
+      "iconPath": "icons/icon.png",
+      "tooltip": "Wallpaper Manager",
+      "menuOnLeftClick": false
+    },
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
+    }
+  },
+  "plugins": {}
+}

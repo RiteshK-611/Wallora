@@ -1,0 +1,13 @@
+{
+  "identifier": "default",
+  "description": "Default permissions for the wallpaper manager",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:default",
+    "core:tray:default",
+    "shell:default",
+    "fs:default",
+    "dialog:default"
+  ]
+}
