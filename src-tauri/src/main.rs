@@ -345,45 +345,50 @@ async fn get_wallpaper_files(directory: String) -> Result<Vec<WallpaperInfo>, St
 }
 
 #[tauri::command]
-async fn get_single_file_info(file_path: String) -> Result<WallpaperInfo, String> {
-    let path = PathBuf::from(&file_path);
-    
-    if !path.exists() {
-        return Err("File does not exist".to_string());
-    }
-    
-    let metadata = std::fs::metadata(&path)
-        .map_err(|e| format!("Failed to get file metadata: {}", e))?;
-    
-    if !metadata.is_file() {
-        return Err("Path is not a file".to_string());
-    }
-    
-    let file_extension = path.extension()
-        .and_then(|ext| ext.to_str())
-        .unwrap_or("")
-        .to_lowercase();
-    
+async fn get_files_info(file_paths: Vec<String>) -> Result<Vec<WallpaperInfo>, String> {
+    let mut wallpapers = Vec::new();
     let supported_extensions = [
         "jpg", "jpeg", "png", "bmp", "webp", "tiff", "tga",
         "mp4", "webm", "avi", "mov", "mkv", "gif"
     ];
-    
-    if !supported_extensions.contains(&file_extension.as_str()) {
-        return Err("Unsupported file type".to_string());
-    }
-    
-    Ok(WallpaperInfo {
-        path: path.to_string_lossy().to_string(),
-        name: path.file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .to_string(),
-        file_type: file_extension,
-        size: metadata.len(),
-    })
-}
 
+    for file_path in file_paths {
+        let path = PathBuf::from(&file_path);
+        
+        if !path.exists() {
+            eprintln!("File does not exist: {}", file_path);
+            continue;
+        }
+        
+        if !path.is_file() {
+            eprintln!("Path is not a file: {}", file_path);
+            continue;
+        }
+        
+        if let Some(extension) = path.extension() {
+            if let Some(ext_str) = extension.to_str() {
+                let ext_lower = ext_str.to_lowercase();
+                if supported_extensions.contains(&ext_lower.as_str()) {
+                    if let Ok(metadata) = std::fs::metadata(&path) {
+                        wallpapers.push(WallpaperInfo {
+                            path: path.to_string_lossy().to_string(),
+                            name: path.file_name()
+                                .unwrap_or_default()
+                                .to_string_lossy()
+                                .to_string(),
+                            file_type: ext_lower,
+                            size: metadata.len(),
+                        });
+                    }
+                } else {
+                    eprintln!("Unsupported file type: {}", ext_str);
+                }
+            }
+        }
+    }
+
+    Ok(wallpapers)
+}
 
 #[tauri::command]
 async fn show_main_window(window: Window) -> Result<(), String> {
@@ -474,7 +479,7 @@ fn main() {
             create_video_wallpaper,
             stop_video_wallpaper,
             get_wallpaper_files,
-            get_single_file_info,
+            get_files_info,
             show_main_window,
             hide_main_window
         ])

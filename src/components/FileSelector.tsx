@@ -4,47 +4,20 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { WallpaperInfo } from '../types/wallpaper';
 
 interface FileSelectorProps {
-  onWallpapersLoad: (wallpapers: WallpaperInfo[]) => void;
+  onWallpapersAdd: (wallpapers: WallpaperInfo[]) => void;
 }
 
-const FileSelector: React.FC<FileSelectorProps> = ({ onWallpapersLoad }) => {
+const FileSelector: React.FC<FileSelectorProps> = ({ onWallpapersAdd }) => {
   const [loading, setLoading] = useState(false);
-  const [selectedPath, setSelectedPath] = useState<string>('');
-  const [selectionType, setSelectionType] = useState<'folder' | 'file' | ''>('');
 
-  const loadWallpaperFolder = async () => {
+  const addFiles = async () => {
     try {
-      const directory = await open({
-        directory: true,
-        title: 'Select Wallpaper Folder',
-      });
-      
-      if (directory) {
-        setLoading(true);
-        setSelectedPath(directory as string);
-        setSelectionType('folder');
-        
-        const files = await invoke<WallpaperInfo[]>('get_wallpaper_files', {
-          directory,
-        });
-        
-        onWallpapersLoad(files);
-      }
-    } catch (error) {
-      console.error('Error loading wallpaper folder:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadSingleFile = async () => {
-    try {
-      const file = await open({
-        multiple: false,
-        title: 'Select Wallpaper File',
+      const files = await open({
+        multiple: true,  // This allows both single and multiple selection
+        title: 'Select Wallpaper Files',
         filters: [
           {
-            name: 'Wallpaper Files',
+            name: 'All Wallpapers',
             extensions: ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff', 'tga', 'mp4', 'webm', 'avi', 'mov', 'mkv', 'gif']
           },
           {
@@ -62,75 +35,44 @@ const FileSelector: React.FC<FileSelectorProps> = ({ onWallpapersLoad }) => {
         ]
       });
       
-      if (file) {
+      if (files) {
         setLoading(true);
-        setSelectedPath(file as string);
-        setSelectionType('file');
         
-        // Create a single wallpaper info object
-        const singleFile = await invoke<WallpaperInfo>('get_single_file_info', {
-          filePath: file,
+        // Handle both single and multiple file selection
+        const filePaths = Array.isArray(files) ? files : [files];
+        
+        const wallpaperInfos = await invoke<WallpaperInfo[]>('get_files_info', {
+          filePaths: filePaths,
         });
         
-        onWallpapersLoad([singleFile]);
+        onWallpapersAdd(wallpaperInfos);
       }
     } catch (error) {
-      console.error('Error loading single file:', error);
+      console.error('Error loading files:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getDisplayPath = () => {
-    if (!selectedPath) return '';
-    
-    if (selectionType === 'folder') {
-      return selectedPath.split('/').pop() || selectedPath.split('\\').pop() || selectedPath;
-    } else {
-      const parts = selectedPath.split('/').length > 1 ? selectedPath.split('/') : selectedPath.split('\\');
-      return parts[parts.length - 1];
     }
   };
 
   return (
     <div className="file-selector">
       <div className="selector-header">
-        <div className="selection-buttons">
-          <button 
-            onClick={loadWallpaperFolder} 
-            className="btn btn-primary"
-            disabled={loading}
-          >
-            {loading && selectionType === 'folder' ? '⏳ Loading...' : '📁 Browse Folder'}
-          </button>
-          
-          <button 
-            onClick={loadSingleFile} 
-            className="btn btn-secondary"
-            disabled={loading}
-          >
-            {loading && selectionType === 'file' ? '⏳ Loading...' : '🖼️ Select File'}
-          </button>
-        </div>
-        
-        {selectedPath && (
-          <div className="selected-path-container">
-            <span className="selection-type">
-              {selectionType === 'folder' ? '📂' : '📄'} {selectionType === 'folder' ? 'Folder' : 'File'}:
-            </span>
-            <span className="selected-path" title={selectedPath}>
-              {getDisplayPath()}
-            </span>
-          </div>
-        )}
+        <button 
+          onClick={addFiles} 
+          className="btn btn-primary"
+          disabled={loading}
+        >
+          {loading ? '⏳ Adding...' : '➕ Add Wallpapers'}
+        </button>
+        <span className="file-hint">
+          💡 You can select single or multiple files
+        </span>
       </div>
       
       {loading && (
         <div className="loading-indicator">
           <div className="spinner"></div>
-          <span>
-            {selectionType === 'folder' ? 'Scanning folder for wallpapers...' : 'Loading file...'}
-          </span>
+          <span>Processing selected files...</span>
         </div>
       )}
     </div>
