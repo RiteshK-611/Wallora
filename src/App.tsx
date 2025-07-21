@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import WallpaperManager from './components/WallpaperManager';
 import { WallpaperSettings } from './types/wallpaper';

@@ -197,13 +197,16 @@ async fn create_video_wallpaper(
         
         match result {
             Ok(Ok(_)) => {
-                log::info!("Successfully set wallpaper behind desktop");
+                #[cfg(debug_assertions)]
+                println!("Successfully set wallpaper behind desktop");
             }
-            Ok(Err(e)) => {
-                log::warn!("Failed to set wallpaper behind desktop: {}", e);
+            Ok(Err(_e)) => {
+                #[cfg(debug_assertions)]
+                eprintln!("Failed to set wallpaper behind desktop: {}", _e);
             }
-            Err(e) => {
-                log::warn!("Failed to execute desktop integration task: {}", e);
+            Err(_e) => {
+                #[cfg(debug_assertions)]
+                eprintln!("Failed to execute desktop integration task: {}", _e);
             }
         }
     }
@@ -342,6 +345,47 @@ async fn get_wallpaper_files(directory: String) -> Result<Vec<WallpaperInfo>, St
 }
 
 #[tauri::command]
+async fn get_single_file_info(file_path: String) -> Result<WallpaperInfo, String> {
+    let path = PathBuf::from(&file_path);
+    
+    if !path.exists() {
+        return Err("File does not exist".to_string());
+    }
+    
+    let metadata = std::fs::metadata(&path)
+        .map_err(|e| format!("Failed to get file metadata: {}", e))?;
+    
+    if !metadata.is_file() {
+        return Err("Path is not a file".to_string());
+    }
+    
+    let file_extension = path.extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    
+    let supported_extensions = [
+        "jpg", "jpeg", "png", "bmp", "webp", "tiff", "tga",
+        "mp4", "webm", "avi", "mov", "mkv", "gif"
+    ];
+    
+    if !supported_extensions.contains(&file_extension.as_str()) {
+        return Err("Unsupported file type".to_string());
+    }
+    
+    Ok(WallpaperInfo {
+        path: path.to_string_lossy().to_string(),
+        name: path.file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string(),
+        file_type: file_extension,
+        size: metadata.len(),
+    })
+}
+
+
+#[tauri::command]
 async fn show_main_window(window: Window) -> Result<(), String> {
     window.show().map_err(|e| e.to_string())?;
     window.set_focus().map_err(|e| e.to_string())?;
@@ -374,6 +418,7 @@ fn main() {
             let _tray = TrayIconBuilder::new()
                 .menu(&menu)
                 .icon(app.default_window_icon().unwrap().clone())
+                .tooltip("Wallpaper Manager")
                 .on_menu_event(move |app, event| match event.id().as_ref() {
                     "show" => {
                         if let Some(window) = app.get_webview_window("main") {
@@ -429,6 +474,7 @@ fn main() {
             create_video_wallpaper,
             stop_video_wallpaper,
             get_wallpaper_files,
+            get_single_file_info,
             show_main_window,
             hide_main_window
         ])

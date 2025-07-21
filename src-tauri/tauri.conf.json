@@ -17,8 +17,18 @@
       "icons/icon.png"
     ],
     "category": "Utility",
-    "shortDescription": "Modern wallpaper manager",
-    "longDescription": "A modern wallpaper manager with video and static image support"
+    "shortDescription": "Desktop wallpaper manager",
+    "longDescription": "A modern wallpaper manager with video and static image support",
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    },
+    "resources": [],
+    "externalBin": [],
+    "copyright": "",
+    "licenseFile": "",
+    "createUpdaterArtifacts": false
   },
   "app": {
     "windows": [
@@ -36,12 +46,6 @@
         "center": true
       }
     ],
-    "trayIcon": {
-      "id": "main-tray",
-      "iconPath": "icons/icon.png",
-      "tooltip": "Wallpaper Manager",
-      "menuOnLeftClick": false
-    },
     "security": {
       "csp": null,
       "assetProtocol": {
