@@ -76,6 +76,19 @@ const WallpaperManager: React.FC = () => {
     }
   };
 
+  const handleCreateDateWidget = async () => {
+    try {
+      setLoading(true);
+      const result = await invoke<string>('create_date_widget');
+      console.log(result);
+    } catch (error) {
+      console.error('Error creating date widget:', error);
+      alert(`Error creating date widget: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getWallpaperByPath = (path: string) => {
     return wallpapers.find(w => w.path === path);
   };
@@ -165,6 +178,13 @@ const WallpaperManager: React.FC = () => {
           disabled={loading || !currentWallpaper || !wallpapers.find(w => w.path === currentWallpaper && (isVideoFile(w.file_type) || isGifFile(w.file_type)))}
         >
           🛑 Stop Live Wallpaper
+        </button>
+        <button 
+          onClick={handleCreateDateWidget} 
+          className="btn btn-primary"
+          disabled={loading}
+        >
+          📅 Show Date Widget
         </button>
         <div className="current-wallpaper-info">
           {currentWallpaper && (

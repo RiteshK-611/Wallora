@@ -11,9 +11,9 @@ pub fn create_tray_menu(app: &tauri::App) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "Show Window", true, None::<&str>)?;
     let hide = MenuItem::with_id(app, "hide", "Hide Window", true, None::<&str>)?;
     let stop_video = MenuItem::with_id(app, "stop_video", "Stop Video Wallpaper", true, None::<&str>)?;
+    let date_widget = MenuItem::with_id(app, "date_widget", "Toggle Date Widget", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &hide, &stop_video, &quit])?;
-
+    let menu = Menu::with_items(app, &[&show, &hide, &stop_video, &date_widget, &quit])?;
     // Create tray icon with event handling
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
@@ -48,6 +48,14 @@ fn handle_tray_menu_event(app: &AppHandle<Wry>, event_id: &str) {
             tauri::async_runtime::spawn(async move {
                 if let Some(state) = app_clone.try_state::<AppState>() {
                     let _ = stop_video_wallpaper(state, app_clone.clone()).await;
+                }
+            });
+        }
+        "date_widget" => {
+            let app_clone = app.clone();
+            tauri::async_runtime::spawn(async move {
+                if let Some(state) = app_clone.try_state::<AppState>() {
+                    let _ = crate::commands::create_date_widget(app_clone.clone(), state).await;
                 }
             });
         }

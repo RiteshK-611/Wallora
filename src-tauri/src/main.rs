@@ -30,7 +30,11 @@ fn main() {
             get_wallpaper_files,
             get_files_info,
             show_main_window,
-            hide_main_window
+            hide_main_window,
+            create_date_widget,
+            hide_date_widget,
+            show_date_widget,
+            close_date_widget
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

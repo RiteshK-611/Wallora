@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use walkdir::WalkDir;
 use crate::types::WallpaperInfo;
-use crate::utils::file_utils::{get_supported_extensions, get_mime_type};
+use crate::utils::file_utils::get_supported_extensions;
 
 #[tauri::command]
 pub async fn get_wallpaper_files(directory: String) -> Result<Vec<WallpaperInfo>, String> {

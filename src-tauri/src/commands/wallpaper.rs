@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use tauri::{AppHandle, State, Wry};
 use crate::state::AppState;
-use crate::utils::file_utils::{get_mime_type, is_video_type, is_gif_type};
+use crate::utils::file_utils::{get_mime_type, is_gif_type};
 
 #[cfg(target_os = "windows")]
 use crate::platform::windows::set_wallpaper_behind_desktop_sync;

@@ -66,3 +66,28 @@ pub fn set_wallpaper_behind_desktop_sync(window: &tauri::WebviewWindow) -> Resul
 
     Ok(())
 }
+
+#[cfg(target_os = "windows")]
+pub fn set_widget_above_wallpaper(window: &tauri::WebviewWindow) -> Result<(), String> {
+    use winapi::um::winuser::{SetWindowPos, HWND_BOTTOM, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE};
+    use winapi::shared::windef::HWND;
+
+    // Get window handle
+    let hwnd = window.hwnd().map_err(|e| e.to_string())?.0 as HWND;
+
+    // Set window to bottom of Z-order (above wallpaper, below apps)
+    unsafe {
+        let result = SetWindowPos(
+            hwnd,
+            HWND_BOTTOM,
+            0, 0, 0, 0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+        );
+        
+        if result == 0 {
+            return Err("Failed to position widget above wallpaper".to_string());
+        }
+    }
+
+    Ok(())
+}
