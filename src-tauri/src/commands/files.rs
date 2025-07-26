@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use walkdir::WalkDir;
 use crate::types::WallpaperInfo;
-use crate::utils::file_utils::get_supported_extensions;
+use crate::utils::file_utils::{get_supported_extensions, get_mime_type};
 
 #[tauri::command]
 pub async fn get_wallpaper_files(directory: String) -> Result<Vec<WallpaperInfo>, String> {
@@ -50,11 +50,13 @@ pub async fn get_files_info(file_paths: Vec<String>) -> Result<Vec<WallpaperInfo
         let path = PathBuf::from(&file_path);
         
         if !path.exists() {
+            #[cfg(debug_assertions)]
             eprintln!("File does not exist: {}", file_path);
             continue;
         }
         
         if !path.is_file() {
+            #[cfg(debug_assertions)]
             eprintln!("Path is not a file: {}", file_path);
             continue;
         }
@@ -75,6 +77,7 @@ pub async fn get_files_info(file_paths: Vec<String>) -> Result<Vec<WallpaperInfo
                         });
                     }
                 } else {
+                    #[cfg(debug_assertions)]
                     eprintln!("Unsupported file type: {}", ext_str);
                 }
             }

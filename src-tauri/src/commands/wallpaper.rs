@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use tauri::{AppHandle, State, Wry};
 use crate::state::AppState;
-use crate::utils::file_utils::*;
+use crate::utils::file_utils::{get_mime_type, is_video_type, is_gif_type};
 
 #[cfg(target_os = "windows")]
 use crate::platform::windows::set_wallpaper_behind_desktop_sync;
@@ -110,7 +110,16 @@ pub async fn create_video_wallpaper(
         video_windows.insert("current".to_string(), window_label.clone());
     }
 
-    let mime_type = get_mime_type(&file_path);
+    let file_extension = path.extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    
+    let mime_type = if is_gif_type(&file_extension) {
+        "image/gif".to_string()
+    } else {
+        get_mime_type(&file_path)
+    };
 
     // Create wallpaper window URL with parameters
     let wallpaper_url = format!(

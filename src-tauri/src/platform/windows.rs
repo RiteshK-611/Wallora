@@ -20,7 +20,7 @@ pub fn set_wallpaper_behind_desktop_sync(window: &tauri::WebviewWindow) -> Resul
         PostMessageW(progman, 0x052C, 0xD, 0x1);
     }
 
-    // Synchronous wait instead of async sleep
+    // Brief wait for WorkerW to spawn
     std::thread::sleep(std::time::Duration::from_millis(100));
 
     // Find WorkerW window
@@ -41,14 +41,14 @@ pub fn set_wallpaper_behind_desktop_sync(window: &tauri::WebviewWindow) -> Resul
         current_window = unsafe { FindWindowExA(std::ptr::null_mut(), current_window, workerw_class.as_ptr(), std::ptr::null()) };
     }
     
-    // Case 2 fallback
+    // Fallback: Look for WorkerW under Progman
     if worker_w.is_null() {
         worker_w = unsafe { FindWindowExA(progman, std::ptr::null_mut(), workerw_class.as_ptr(), std::ptr::null()) };
         
         let mut attempts = 0;
         while worker_w.is_null() && attempts < 10 {
             attempts += 1;
-            std::thread::sleep(std::time::Duration::from_millis(100)); // Synchronous sleep
+            std::thread::sleep(std::time::Duration::from_millis(100));
             worker_w = unsafe { FindWindowExA(progman, std::ptr::null_mut(), workerw_class.as_ptr(), std::ptr::null()) };
         }
     }

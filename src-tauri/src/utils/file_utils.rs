@@ -7,6 +7,16 @@ pub fn get_supported_extensions() -> [&'static str; 13] {
     ]
 }
 
+// Utility function to check if a file is a video type
+pub fn is_video_type(file_type: &str) -> bool {
+    matches!(file_type.to_lowercase().as_str(), "mp4" | "webm" | "avi" | "mov" | "mkv")
+}
+
+// Utility function to check if a file is a GIF
+pub fn is_gif_type(file_type: &str) -> bool {
+    file_type.to_lowercase() == "gif"
+}
+
 pub fn get_mime_type(file_path: &str) -> String {
     let path = Path::new(file_path);
     let file_extension = path.extension()
@@ -26,16 +36,4 @@ pub fn get_mime_type(file_path: &str) -> String {
             _ => "video/mp4",
         }.to_string()
     }
-}
-
-pub fn is_video_file(file_type: &str) -> bool {
-    matches!(file_type.to_lowercase().as_str(), "mp4" | "webm" | "avi" | "mov" | "mkv")
-}
-
-pub fn is_gif_file(file_type: &str) -> bool {
-    file_type.to_lowercase() == "gif"
-}
-
-pub fn is_image_file(file_type: &str) -> bool {
-    matches!(file_type.to_lowercase().as_str(), "jpg" | "jpeg" | "png" | "bmp" | "webp" | "tiff" | "tga")
 }
