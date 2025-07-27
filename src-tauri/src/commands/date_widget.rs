@@ -1,5 +1,6 @@
 use tauri::{AppHandle, State, Wry};
 use crate::state::AppState;
+use tauri::Manager;
 
 #[tauri::command]
 pub async fn create_date_widget(
@@ -37,9 +38,8 @@ pub async fn create_date_widget(
     .skip_taskbar(true)
     .always_on_top(false)
     .transparent(true)
-    .width(400.0)
-    .height(200.0)
-    .center()
+    .inner_size(400.0, 200.0)
+    .position(100.0, 100.0)
     .build()
     .map_err(|e| format!("Failed to create date widget window: {}", e))?;
 
@@ -80,7 +80,7 @@ pub async fn create_date_widget(
 
 #[tauri::command]
 pub async fn hide_date_widget(state: State<'_, AppState>, app: AppHandle<Wry>) -> Result<String, String> {
-    let mut date_widgets = state.date_widgets.lock().unwrap();
+    let date_widgets = state.date_widgets.lock().unwrap();
     if let Some(window_label) = date_widgets.get("current") {
         if let Some(window) = app.get_webview_window(window_label) {
             window.hide().map_err(|e| format!("Failed to hide date widget: {}", e))?;

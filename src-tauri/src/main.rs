@@ -35,10 +35,6 @@ fn main() {
             hide_date_widget,
             show_date_widget,
             close_date_widget
-            create_date_widget,
-            hide_date_widget,
-            show_date_widget,
-            close_date_widget
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
