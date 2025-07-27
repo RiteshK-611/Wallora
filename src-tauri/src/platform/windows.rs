@@ -70,7 +70,7 @@ pub fn set_wallpaper_behind_desktop_sync(window: &tauri::WebviewWindow) -> Resul
 #[cfg(target_os = "windows")]
 pub fn set_widget_on_desktop(window: &tauri::WebviewWindow) -> Result<(), String> {
     use winapi::um::winuser::{
-        SetWindowPos, SetParent, FindWindowA, FindWindowExA,
+        SetWindowPos, SetParent, FindWindowA,
         HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
         WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, SetWindowLongA, GWL_EXSTYLE, GetWindowLongA
     };

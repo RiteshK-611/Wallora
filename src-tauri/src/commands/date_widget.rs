@@ -32,14 +32,14 @@ pub async fn create_date_widget(
     .closable(false)
     .resizable(false)
     .decorations(false)
-    .shadow(true)
+    .shadow(false)
     .visible(false)
     .skip_taskbar(true)
-    .always_on_top(true)
+    .always_on_top(false)
     .transparent(true)
     .width(400.0)
     .height(200.0)
-    .position(100.0, 100.0)
+    .center()
     .build()
     .map_err(|e| format!("Failed to create date widget window: {}", e))?;
 

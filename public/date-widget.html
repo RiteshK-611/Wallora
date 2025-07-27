@@ -11,21 +11,15 @@
             box-sizing: border-box;
         }
         
-        body {
+        html, body {
             width: 400px;
             height: 200px;
-            background: transparent;
-            color: #FFD700;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 20px;
-            cursor: move;
-            user-select: none;
-            position: relative;
+            background: transparent !important;
             overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-app-region: drag;
         }
         
         .widget-container {
@@ -40,6 +34,7 @@
             align-items: center;
             position: relative;
             overflow: hidden;
+            cursor: move;
         }
         
         .widget-container::before {
@@ -98,25 +93,15 @@
     </style>
 </head>
 <body>
-    <div class="widget-container">
-        <div class="day-name" id="dayName">SATURDAY</div>
+    <div class="widget-container" id="widgetContainer">
+        <div class="day-name" id="dayName">SUNDAY</div>
         <div class="date-info">
-            <div class="date" id="dateText">July 26, 2025</div>
-            <div class="time" id="timeText">- 12:23 AM -</div>
+            <div class="date" id="dateText">July 27, 2025</div>
+            <div class="time" id="timeText">- 2:17 PM -</div>
         </div>
     </div>
     
     <script>
-        let isDragging = false;
-        let currentX;
-        let currentY;
-        let initialX;
-        let initialY;
-        let xOffset = 0;
-        let yOffset = 0;
-
-        const widget = document.body;
-
         // Update date and time
         function updateDateTime() {
             const now = new Date();
@@ -141,66 +126,11 @@
             document.getElementById('timeText').textContent = timeText;
         }
 
-        // Drag functionality
-        widget.addEventListener('mousedown', dragStart, false);
-        document.addEventListener('mousemove', drag, false);
-        document.addEventListener('mouseup', dragEnd, false);
-
-        function dragStart(e) {
-            e.preventDefault();
-            
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-
-            isDragging = true;
-            widget.classList.add('dragging');
-        }
-
-        function drag(e) {
-            if (isDragging) {
-                e.preventDefault();
-                
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-
-                xOffset = currentX;
-                yOffset = currentY;
-
-                // Calculate screen position
-                const screenX = e.screenX - e.clientX + currentX;
-                const screenY = e.screenY - e.clientY + currentY;
-
-                // Move the window using Tauri API
-                if (window.__TAURI__ && window.__TAURI__.window) {
-                    window.__TAURI__.window.getCurrent().setPosition(
-                        new window.__TAURI__.window.PhysicalPosition(screenX, screenY)
-                    ).catch(err => console.error('Failed to set position:', err));
-                }
-            }
-        }
-
-        function dragEnd(e) {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
-            widget.classList.remove('dragging');
-        }
-
         // Initialize
         updateDateTime();
         setInterval(updateDateTime, 1000); // Update every second
 
-        // Load Tauri API when available
-        if (window.__TAURI__) {
-            console.log('Tauri API loaded');
-        } else {
-            // Wait for Tauri to load
-            window.addEventListener('DOMContentLoaded', () => {
-                if (window.__TAURI__) {
-                    console.log('Tauri API loaded after DOM');
-                }
-            });
-        }
+        console.log('Date widget loaded successfully');
     </script>
 </body>
 </html>
