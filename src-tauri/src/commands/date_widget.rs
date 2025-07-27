@@ -32,19 +32,16 @@ pub async fn create_date_widget(
     .closable(false)
     .resizable(false)
     .decorations(false)
-    .shadow(false)
+    .shadow(true)
     .visible(false)
     .skip_taskbar(true)
-    .always_on_top(false)
+    .always_on_top(true)
+    .transparent(true)
     .width(400.0)
     .height(200.0)
     .position(100.0, 100.0)
     .build()
     .map_err(|e| format!("Failed to create date widget window: {}", e))?;
-
-    // Set window to always be on bottom (above wallpaper but below apps)
-    date_window.set_always_on_bottom(true)
-        .map_err(|e| format!("Failed to set always on bottom: {}", e))?;
 
     // Show window after setup
     date_window.show()
@@ -53,19 +50,19 @@ pub async fn create_date_widget(
     // Wait for window to be ready
     tokio::time::sleep(std::time::Duration::from_millis(300)).await;
 
-    // Windows-specific: Set window behind desktop icons but above wallpaper
+    // Windows-specific: Set window to desktop level
     #[cfg(target_os = "windows")]
     {
         let date_window_clone = date_window.clone();
         
         let result = tokio::task::spawn_blocking(move || {
-            crate::platform::windows::set_widget_above_wallpaper(&date_window_clone)
+            crate::platform::windows::set_widget_on_desktop(&date_window_clone)
         }).await;
         
         match result {
             Ok(Ok(_)) => {
                 #[cfg(debug_assertions)]
-                println!("Successfully positioned date widget above wallpaper");
+                println!("Successfully positioned date widget on desktop");
             }
             Ok(Err(_e)) => {
                 #[cfg(debug_assertions)]

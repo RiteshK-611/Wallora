@@ -14,7 +14,7 @@
         body {
             width: 400px;
             height: 200px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: transparent;
             color: #FFD700;
             font-family: 'Arial', sans-serif;
             display: flex;
@@ -22,14 +22,27 @@
             justify-content: center;
             align-items: center;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             cursor: move;
             user-select: none;
             position: relative;
             overflow: hidden;
         }
         
-        body::before {
+        .widget-container {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .widget-container::before {
             content: '';
             position: absolute;
             top: 0;
@@ -76,30 +89,6 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
         
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #FFD700;
-            font-size: 1.2rem;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 2;
-        }
-        
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-        
         /* Dragging styles */
         .dragging {
             opacity: 0.8;
@@ -109,11 +98,12 @@
     </style>
 </head>
 <body>
-    <button class="close-btn" onclick="closeWidget()">×</button>
-    <div class="day-name" id="dayName">SATURDAY</div>
-    <div class="date-info">
-        <div class="date" id="dateText">July 26, 2025</div>
-        <div class="time" id="timeText">- 12:23 AM -</div>
+    <div class="widget-container">
+        <div class="day-name" id="dayName">SATURDAY</div>
+        <div class="date-info">
+            <div class="date" id="dateText">July 26, 2025</div>
+            <div class="time" id="timeText">- 12:23 AM -</div>
+        </div>
     </div>
     
     <script>
@@ -152,70 +142,65 @@
         }
 
         // Drag functionality
-        widget.addEventListener('mousedown', dragStart);
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('mouseup', dragEnd);
+        widget.addEventListener('mousedown', dragStart, false);
+        document.addEventListener('mousemove', drag, false);
+        document.addEventListener('mouseup', dragEnd, false);
 
         function dragStart(e) {
-            if (e.target.classList.contains('close-btn')) return;
+            e.preventDefault();
             
             initialX = e.clientX - xOffset;
             initialY = e.clientY - yOffset;
 
-            if (e.target === widget || widget.contains(e.target)) {
-                isDragging = true;
-                widget.classList.add('dragging');
-            }
+            isDragging = true;
+            widget.classList.add('dragging');
         }
 
         function drag(e) {
             if (isDragging) {
                 e.preventDefault();
+                
                 currentX = e.clientX - initialX;
                 currentY = e.clientY - initialY;
 
                 xOffset = currentX;
                 yOffset = currentY;
 
+                // Calculate screen position
+                const screenX = e.screenX - e.clientX + currentX;
+                const screenY = e.screenY - e.clientY + currentY;
+
                 // Move the window using Tauri API
-                if (window.__TAURI__) {
+                if (window.__TAURI__ && window.__TAURI__.window) {
                     window.__TAURI__.window.getCurrent().setPosition(
-                        new window.__TAURI__.window.PhysicalPosition(
-                            e.screenX - e.clientX + currentX,
-                            e.screenY - e.clientY + currentY
-                        )
-                    );
+                        new window.__TAURI__.window.PhysicalPosition(screenX, screenY)
+                    ).catch(err => console.error('Failed to set position:', err));
                 }
             }
         }
 
-        function dragEnd() {
+        function dragEnd(e) {
             initialX = currentX;
             initialY = currentY;
             isDragging = false;
             widget.classList.remove('dragging');
         }
 
-        // Close widget function
-        async function closeWidget() {
-            if (window.__TAURI__) {
-                try {
-                    await window.__TAURI__.core.invoke('close_date_widget');
-                } catch (error) {
-                    console.error('Error closing widget:', error);
-                }
-            }
-        }
-
         // Initialize
         updateDateTime();
         setInterval(updateDateTime, 1000); // Update every second
 
-        // Load Tauri API
-        const script = document.createElement('script');
-        script.src = '/src/main.tsx';
-        script.type = 'module';
-        document.head.appendChild(script);
+        // Load Tauri API when available
+        if (window.__TAURI__) {
+            console.log('Tauri API loaded');
+        } else {
+            // Wait for Tauri to load
+            window.addEventListener('DOMContentLoaded', () => {
+                if (window.__TAURI__) {
+                    console.log('Tauri API loaded after DOM');
+                }
+            });
+        }
     </script>
 </body>
 </html>
