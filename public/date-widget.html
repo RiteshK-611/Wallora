@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 400px;
+            height: 200px;
+            background: transparent !important;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-app-region: drag;
+        }
+        
+        .widget-container {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            cursor: move;
+        }
+        
+        .widget-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 20px;
+        }
+        
+        .day-name {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .date-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .date {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .time {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Dragging styles */
+        .dragging {
+            opacity: 0.8;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container" id="widgetContainer">
+        <div class="day-name" id="dayName">SUNDAY</div>
+        <div class="date-info">
+            <div class="date" id="dateText">July 27, 2025</div>
+            <div class="time" id="timeText">- 2:17 PM -</div>
+        </div>
+    </div>
+    
+    <script>
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Day name
+            const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+            document.getElementById('dayName').textContent = dayNames[now.getDay()];
+            
+            // Date
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            const dateText = `${monthNames[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+            document.getElementById('dateText').textContent = dateText;
+            
+            // Time
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            const timeText = `- ${hours}:${minutes} ${ampm} -`;
+            document.getElementById('timeText').textContent = timeText;
+        }
+
+        // Initialize
+        updateDateTime();
+        setInterval(updateDateTime, 1000); // Update every second
+
+        console.log('Date widget loaded successfully');
+    </script>
+</body>
+</html>

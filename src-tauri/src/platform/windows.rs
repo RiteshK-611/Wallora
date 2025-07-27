@@ -66,3 +66,44 @@ pub fn set_wallpaper_behind_desktop_sync(window: &tauri::WebviewWindow) -> Resul
 
     Ok(())
 }
+
+#[cfg(target_os = "windows")]
+pub fn set_widget_on_desktop(window: &tauri::WebviewWindow) -> Result<(), String> {
+    use winapi::um::winuser::{
+        SetWindowPos, SetParent, FindWindowA,
+        HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+        WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, SetWindowLongA, GWL_EXSTYLE, GetWindowLongA
+    };
+    use winapi::shared::windef::HWND;
+    use std::ffi::CString;
+
+    // Get window handle
+    let hwnd = window.hwnd().map_err(|e| e.to_string())?.0 as HWND;
+
+    // Get Progman window (desktop)
+    let progman_class = CString::new("Progman").map_err(|e| e.to_string())?;
+    let progman = unsafe { FindWindowA(progman_class.as_ptr(), std::ptr::null()) };
+    
+    if !progman.is_null() {
+        // Try to set as child of Progman (desktop level)
+        unsafe {
+            SetParent(hwnd, progman);
+        }
+    }
+
+    // Set extended window styles to prevent activation and hide from taskbar
+    unsafe {
+        let current_style = GetWindowLongA(hwnd, GWL_EXSTYLE);
+        SetWindowLongA(hwnd, GWL_EXSTYLE, current_style | WS_EX_NOACTIVATE as i32 | WS_EX_TOOLWINDOW as i32);
+        
+        // Position window appropriately
+        SetWindowPos(
+            hwnd,
+            HWND_TOPMOST,
+            0, 0, 0, 0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+        );
+    }
+
+    Ok(())
+}
