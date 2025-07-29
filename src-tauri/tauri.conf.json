@@ -48,14 +48,7 @@
       "assetProtocol": {
         "enable": true,
         "scope": ["**"]
-      },
-      "capabilities": [
-        {
-          "identifier": "draggable-window",
-          "windows": ["*"],
-          "permissions": ["core:window:allow-start-dragging"]
-        }
-      ]
+      }
     }
   },
   "plugins": {}

@@ -1,13 +1,14 @@
 {
   "identifier": "default",
   "description": "Default permissions for the wallpaper manager",
-  "windows": ["main"],
+  "windows": ["*"],
   "permissions": [
     "core:default",
     "core:window:default",
     "core:tray:default",
     "shell:default",
     "fs:default",
-    "dialog:default"
+    "dialog:default",
+    "core:window:allow-start-dragging"
   ]
 }
