@@ -84,18 +84,18 @@ pub fn set_widget_on_desktop(window: &tauri::WebviewWindow) -> Result<(), String
     let progman_class = CString::new("Progman").map_err(|e| e.to_string())?;
     let progman = unsafe { FindWindowA(progman_class.as_ptr(), std::ptr::null()) };
     
-    if !progman.is_null() {
-        // Try to set as child of Progman (desktop level)
-        unsafe {
-            SetParent(hwnd, progman);
-        }
-    }
+    
 
     // Set extended window styles to prevent activation, hide from taskbar, and enable transparency
     unsafe {
         let current_style = GetWindowLongA(hwnd, GWL_EXSTYLE) as u32;
         SetWindowLongA(hwnd, GWL_EXSTYLE, (current_style | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_LAYERED) as i32);
         
+        if !progman.is_null() {
+            // Try to set as child of Progman (desktop level)
+            SetParent(hwnd, progman);
+        }
+
         // Position window appropriately
         SetWindowPos(
             hwnd,
