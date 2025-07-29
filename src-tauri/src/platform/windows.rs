@@ -71,8 +71,8 @@ pub fn set_wallpaper_behind_desktop_sync(window: &tauri::WebviewWindow) -> Resul
 pub fn set_widget_on_desktop(window: &tauri::WebviewWindow) -> Result<(), String> {
     use winapi::um::winuser::{
         SetWindowPos, SetParent, FindWindowA,
-        HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
-        WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, SetWindowLongA, GWL_EXSTYLE, GetWindowLongA
+        HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW,
+        WS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_EX_LAYERED, SetWindowLongA, GWL_EXSTYLE, GetWindowLongA
     };
     use winapi::shared::windef::HWND;
     use std::ffi::CString;
@@ -91,17 +91,17 @@ pub fn set_widget_on_desktop(window: &tauri::WebviewWindow) -> Result<(), String
         }
     }
 
-    // Set extended window styles to prevent activation and hide from taskbar
+    // Set extended window styles to prevent activation, hide from taskbar, and enable transparency
     unsafe {
-        let current_style = GetWindowLongA(hwnd, GWL_EXSTYLE);
-        SetWindowLongA(hwnd, GWL_EXSTYLE, current_style | WS_EX_NOACTIVATE as i32 | WS_EX_TOOLWINDOW as i32);
+        let current_style = GetWindowLongA(hwnd, GWL_EXSTYLE) as u32;
+        SetWindowLongA(hwnd, GWL_EXSTYLE, (current_style | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_LAYERED) as i32);
         
         // Position window appropriately
         SetWindowPos(
             hwnd,
             HWND_TOPMOST,
             0, 0, 0, 0,
-            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW
         );
     }
 
