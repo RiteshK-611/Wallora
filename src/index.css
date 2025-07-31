@@ -425,16 +425,26 @@ input:checked + .toggle-slider:before {
 
 /* Scale Control */
 .scale-control {
-  width: 200px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 250px;
 }
 
 .scale-slider {
-  width: 100%;
+  flex: 1;
   height: 6px;
   border-radius: 3px;
   background: var(--border-color);
   outline: none;
   -webkit-appearance: none;
+}
+
+.scale-value {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  min-width: 40px;
+  text-align: right;
 }
 
 .scale-slider::-webkit-slider-thumb {

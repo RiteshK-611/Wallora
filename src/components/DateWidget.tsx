@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { DateWidgetSettings, FontOption } from '../types/wallpaper';
 
@@ -27,8 +27,6 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
         onSettingsChange({ ...settings, enabled: false });
       } else {
         await invoke('create_date_widget', { 
-          app: null, 
-          state: null, 
           settings: settings 
         });
         onSettingsChange({ ...settings, enabled: true });
@@ -40,15 +38,33 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
     }
   };
 
-  const handleSettingChange = (key: keyof DateWidgetSettings, value: any) => {
+  const handleSettingChange = async (key: keyof DateWidgetSettings, value: any) => {
     const newSettings = { ...settings, [key]: value };
     onSettingsChange(newSettings);
     
     // If widget is enabled, update it with new settings
     if (settings.enabled) {
-      invoke('update_date_widget', { settings: newSettings }).catch(console.error);
+      try {
+        await invoke('update_date_widget', { settings: newSettings });
+      } catch (error) {
+        console.error('Error updating date widget:', error);
+      }
     }
   };
+
+  // Update widget when settings change
+  useEffect(() => {
+    if (settings.enabled) {
+      const updateWidget = async () => {
+        try {
+          await invoke('update_date_widget', { settings });
+        } catch (error) {
+          console.error('Error updating widget with new settings:', error);
+        }
+      };
+      updateWidget();
+    }
+  }, [settings]);
 
   return (
     <div className="date-widget-container">
@@ -119,6 +135,7 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
                 onChange={(e) => handleSettingChange('scale', parseFloat(e.target.value))}
                 className="scale-slider"
               />
+              <span className="scale-value">{settings.scale.toFixed(1)}x</span>
             </div>
           </div>
 

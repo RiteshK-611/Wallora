@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
+import { open } from '@tauri-apps/plugin-dialog';
 import { WallpaperInfo, WallpaperSettings } from '../types/wallpaper';
-import FileSelector from './FileSelector';
 
 interface WallpaperManagerProps {
   settings: WallpaperSettings;
@@ -13,6 +13,49 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
   const [wallpapers, setWallpapers] = useState<WallpaperInfo[]>([]);
   const [currentWallpaper, setCurrentWallpaper] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  const handleAddFiles = async () => {
+    try {
+      const files = await open({
+        multiple: true,
+        title: 'Select Wallpaper Files',
+        filters: [
+          {
+            name: 'All Wallpapers',
+            extensions: ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff', 'tga', 'mp4', 'webm', 'avi', 'mov', 'mkv', 'gif']
+          },
+          {
+            name: 'Images',
+            extensions: ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff', 'tga']
+          },
+          {
+            name: 'Videos',
+            extensions: ['mp4', 'webm', 'avi', 'mov', 'mkv']
+          },
+          {
+            name: 'GIFs',
+            extensions: ['gif']
+          }
+        ]
+      });
+      
+      if (files) {
+        setLoading(true);
+        
+        const filePaths = Array.isArray(files) ? files : [files];
+        
+        const wallpaperInfos = await invoke<WallpaperInfo[]>('get_files_info', {
+          filePaths: filePaths,
+        });
+        
+        handleAddWallpapers(wallpaperInfos);
+      }
+    } catch (error) {
+      console.error('Error loading files:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddWallpapers = (newWallpapers: WallpaperInfo[]) => {
     setWallpapers(prev => [...prev, ...newWallpapers]);
@@ -213,9 +256,7 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
         <div className="wallpapers-section">
           <div className="wallpapers-header">
             <span className="wallpapers-label">Wallpapers</span>
-            <button className="add-wallpapers-btn" onClick={() => {
-              // This will be handled by FileSelector component
-            }}>
+            <button className="add-wallpapers-btn" onClick={handleAddFiles} disabled={loading}>
               📁
             </button>
           </div>
@@ -247,8 +288,13 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
           )}
         </div>
       </div>
-
-      <FileSelector onWallpapersAdd={handleAddWallpapers} />
+      
+      {loading && (
+        <div className="loading-indicator">
+          <div className="spinner"></div>
+          <span>Processing selected files...</span>
+        </div>
+      )}
     </div>
   );
 };
