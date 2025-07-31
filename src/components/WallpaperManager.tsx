@@ -1,13 +1,61 @@
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { WallpaperInfo } from '../types/wallpaper';
-import FileSelector from './FileSelector';
+import { open } from '@tauri-apps/plugin-dialog';
+import { WallpaperInfo, WallpaperSettings } from '../types/wallpaper';
 
-const WallpaperManager: React.FC = () => {
+interface WallpaperManagerProps {
+  settings: WallpaperSettings;
+  onSettingsChange: (settings: WallpaperSettings) => void;
+}
+
+const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSettingsChange }) => {
   const [wallpapers, setWallpapers] = useState<WallpaperInfo[]>([]);
   const [currentWallpaper, setCurrentWallpaper] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  const handleAddFiles = async () => {
+    try {
+      const files = await open({
+        multiple: true,
+        title: 'Select Wallpaper Files',
+        filters: [
+          {
+            name: 'All Wallpapers',
+            extensions: ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff', 'tga', 'mp4', 'webm', 'avi', 'mov', 'mkv', 'gif']
+          },
+          {
+            name: 'Images',
+            extensions: ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff', 'tga']
+          },
+          {
+            name: 'Videos',
+            extensions: ['mp4', 'webm', 'avi', 'mov', 'mkv']
+          },
+          {
+            name: 'GIFs',
+            extensions: ['gif']
+          }
+        ]
+      });
+      
+      if (files) {
+        setLoading(true);
+        
+        const filePaths = Array.isArray(files) ? files : [files];
+        
+        const wallpaperInfos = await invoke<WallpaperInfo[]>('get_files_info', {
+          filePaths: filePaths,
+        });
+        
+        handleAddWallpapers(wallpaperInfos);
+      }
+    } catch (error) {
+      console.error('Error loading files:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddWallpapers = (newWallpapers: WallpaperInfo[]) => {
     setWallpapers(prev => [...prev, ...newWallpapers]);
@@ -16,7 +64,6 @@ const WallpaperManager: React.FC = () => {
   const handleDeleteWallpaper = (wallpaperPath: string) => {
     setWallpapers(prev => prev.filter(w => w.path !== wallpaperPath));
     
-    // Stop current wallpaper if it's the one being deleted
     if (currentWallpaper === wallpaperPath) {
       setCurrentWallpaper('');
       if (isVideoFile(getWallpaperByPath(wallpaperPath)?.file_type || '') || 
@@ -30,7 +77,6 @@ const WallpaperManager: React.FC = () => {
     try {
       setLoading(true);
       
-      // Auto-stop current video wallpaper if switching to different type
       if (currentWallpaper && (isVideoFile(getWallpaperByPath(currentWallpaper)?.file_type || '') || isGifFile(getWallpaperByPath(currentWallpaper)?.file_type || ''))) {
         if (wallpaper.path !== currentWallpaper) {
           await handleStopVideo();
@@ -76,19 +122,6 @@ const WallpaperManager: React.FC = () => {
     }
   };
 
-  const handleCreateDateWidget = async () => {
-    try {
-      setLoading(true);
-      const result = await invoke<string>('create_date_widget');
-      console.log(result);
-    } catch (error) {
-      console.error('Error creating date widget:', error);
-      alert(`Error creating date widget: ${error}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getWallpaperByPath = (path: string) => {
     return wallpapers.find(w => w.path === path);
   };
@@ -111,134 +144,157 @@ const WallpaperManager: React.FC = () => {
   const renderPreview = (wallpaper: WallpaperInfo) => {
     if (isVideoFile(wallpaper.file_type)) {
       return (
-        <div className="video-preview">
+        <div className="media-preview">
           <video
             src={convertFileSrc(wallpaper.path)}
             muted
             preload="metadata"
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              objectFit: 'cover',
-              pointerEvents: 'none'
-            }}
+            className="preview-media"
           />
-          <span className="file-type-badge video">
-            {wallpaper.file_type.toUpperCase()}
-          </span>
         </div>
       );
     }
 
     if (isGifFile(wallpaper.file_type)) {
       return (
-        <div className="gif-preview">
+        <div className="media-preview">
           <img
             src={convertFileSrc(wallpaper.path)}
             alt={wallpaper.name}
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              objectFit: 'cover' 
-            }}
+            className="preview-media"
           />
-          <span className="file-type-badge gif">
-            GIF
-          </span>
         </div>
       );
     }
 
     return (
-      <div className="image-preview">
+      <div className="media-preview">
         <img
           src={convertFileSrc(wallpaper.path)}
           alt={wallpaper.name}
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            objectFit: 'cover' 
-          }}
+          className="preview-media"
         />
-        <span className="file-type-badge image">
-          {wallpaper.file_type.toUpperCase()}
-        </span>
       </div>
     );
   };
 
   return (
-    <div className="wallpaper-manager">
-      <FileSelector onWallpapersAdd={handleAddWallpapers} />
-      
-      <div className="controls-bar">
-        <button 
-          onClick={handleStopVideo} 
-          className="btn btn-danger"
-          disabled={loading || !currentWallpaper || !wallpapers.find(w => w.path === currentWallpaper && (isVideoFile(w.file_type) || isGifFile(w.file_type)))}
-        >
-          🛑 Stop Live Wallpaper
-        </button>
-        <button 
-          onClick={handleCreateDateWidget} 
-          className="btn btn-primary"
-          disabled={loading}
-        >
-          📅 Show Date Widget
-        </button>
-        <div className="current-wallpaper-info">
-          {currentWallpaper && (
-            <span className="current-info">
-              📋 Current: {getWallpaperByPath(currentWallpaper)?.name || 'Unknown'}
-            </span>
+    <div className="wallpaper-container">
+      <div className="wallpaper-section">
+        <div className="section-header">
+          <h2>Wallpaper Manager</h2>
+        </div>
+
+        <div className="slideshow-controls">
+          <div className="control-row">
+            <span className="control-label">Randomize slideshow</span>
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.autoChange}
+                onChange={(e) => onSettingsChange({ ...settings, autoChange: e.target.checked })}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div className="time-control-row">
+            <span className="control-label">Change wallpaper every</span>
+            <div className="time-inputs">
+              <div className="time-input-group">
+                <span className="time-label">hours:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="23"
+                  value={Math.floor(settings.interval / 3600)}
+                  onChange={(e) => {
+                    const hours = parseInt(e.target.value) || 0;
+                    const minutes = Math.floor((settings.interval % 3600) / 60);
+                    const seconds = settings.interval % 60;
+                    onSettingsChange({ ...settings, interval: hours * 3600 + minutes * 60 + seconds });
+                  }}
+                  className="time-input"
+                />
+              </div>
+              <div className="time-input-group">
+                <span className="time-label">minutes:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={Math.floor((settings.interval % 3600) / 60)}
+                  onChange={(e) => {
+                    const minutes = parseInt(e.target.value) || 0;
+                    const hours = Math.floor(settings.interval / 3600);
+                    const seconds = settings.interval % 60;
+                    onSettingsChange({ ...settings, interval: hours * 3600 + minutes * 60 + seconds });
+                  }}
+                  className="time-input"
+                />
+              </div>
+              <div className="time-input-group">
+                <span className="time-label">seconds:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={settings.interval % 60}
+                  onChange={(e) => {
+                    const seconds = parseInt(e.target.value) || 0;
+                    const hours = Math.floor(settings.interval / 3600);
+                    const minutes = Math.floor((settings.interval % 3600) / 60);
+                    onSettingsChange({ ...settings, interval: hours * 3600 + minutes * 60 + seconds });
+                  }}
+                  className="time-input"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="wallpapers-section">
+          <div className="wallpapers-header">
+            <span className="wallpapers-label">Wallpapers</span>
+            <button className="add-wallpapers-btn" onClick={handleAddFiles} disabled={loading}>
+              📁
+            </button>
+          </div>
+
+          {wallpapers.length === 0 ? (
+            <div className="empty-wallpapers">
+              <p>Empty slideshow, using theme's background instead.</p>
+            </div>
+          ) : (
+            <div className="wallpapers-list">
+              {wallpapers.map((wallpaper) => (
+                <div key={wallpaper.path} className="wallpaper-item">
+                  <div className="wallpaper-preview-small" onClick={() => handleSetWallpaper(wallpaper)}>
+                    {renderPreview(wallpaper)}
+                  </div>
+                  <span className="wallpaper-name">{wallpaper.name}</span>
+                  <button 
+                    className="delete-wallpaper-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteWallpaper(wallpaper.path);
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
       
-      <div className="wallpaper-grid">
-        {loading && <div className="loading">⚡ Processing wallpaper...</div>}
-        
-        {wallpapers.length === 0 && !loading && (
-          <div className="empty-state">
-            <p>🖼️ No wallpapers added</p>
-            <p>Click "Add Wallpapers" to select your favorite wallpapers.</p>
-          </div>
-        )}
-
-        {wallpapers.map((wallpaper) => (
-          <div
-            key={wallpaper.path}
-            className={`wallpaper-card ${
-              currentWallpaper === wallpaper.path ? 'active' : ''
-            }`}
-          >
-            <div className="wallpaper-preview" onClick={() => handleSetWallpaper(wallpaper)}>
-              {renderPreview(wallpaper)}
-            </div>
-            
-            <div className="wallpaper-info">
-              <h4 title={wallpaper.name}>{wallpaper.name}</h4>
-              <p>{formatFileSize(wallpaper.size)}</p>
-              {currentWallpaper === wallpaper.path && (
-                <span className="current-badge">
-                  {isVideoFile(wallpaper.file_type) || isGifFile(wallpaper.file_type) ? '🎬 Playing' : '🖼️ Active'}
-                </span>
-              )}
-            </div>
-            
-            <button 
-              className="delete-button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteWallpaper(wallpaper.path);
-              }}
-              title="Remove wallpaper"
-            >
-              🗑️
-            </button>
-          </div>
-        ))}
-      </div>
+      {loading && (
+        <div className="loading-indicator">
+          <div className="spinner"></div>
+          <span>Processing selected files...</span>
+        </div>
+      )}
     </div>
   );
 };

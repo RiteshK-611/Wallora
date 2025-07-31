@@ -56,18 +56,14 @@ const FileSelector: React.FC<FileSelectorProps> = ({ onWallpapersAdd }) => {
 
   return (
     <div className="file-selector">
-      <div className="selector-header">
-        <button 
-          onClick={addFiles} 
-          className="btn btn-primary"
-          disabled={loading}
-        >
-          {loading ? '⏳ Adding...' : '➕ Add Wallpapers'}
-        </button>
-        <span className="file-hint">
-          💡 You can select single or multiple files
-        </span>
-      </div>
+      <button 
+        onClick={addFiles} 
+        className="add-wallpapers-btn"
+        disabled={loading}
+        style={{ display: 'none' }} // Hidden, triggered by parent component
+      >
+        📁
+      </button>
       
       {loading && (
         <div className="loading-indicator">
@@ -77,6 +73,13 @@ const FileSelector: React.FC<FileSelectorProps> = ({ onWallpapersAdd }) => {
       )}
     </div>
   );
+};
+
+// Expose the addFiles function to parent
+export const triggerFileSelection = (fileSelector: any) => {
+  if (fileSelector && fileSelector.addFiles) {
+    fileSelector.addFiles();
+  }
 };
 
 export default FileSelector;

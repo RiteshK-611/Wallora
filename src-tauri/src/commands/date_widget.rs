@@ -1,11 +1,14 @@
-use tauri::{AppHandle, State, Wry};
+use tauri::{AppHandle, State, Wry, WebviewUrl};
 use crate::state::AppState;
+use crate::types::DateWidgetSettings;
 use tauri::Manager;
+use serde_json;
 
 #[tauri::command]
 pub async fn create_date_widget(
     app: AppHandle<Wry>,
     state: State<'_, AppState>,
+    settings: DateWidgetSettings,
 ) -> Result<String, String> {
     // Create unique window label for date widget
     let window_label = "date-widget";
@@ -21,11 +24,17 @@ pub async fn create_date_widget(
         date_widgets.insert("current".to_string(), window_label.to_string());
     }
 
-    // Create date widget window
+    // Serialize settings to pass to the widget
+    let settings_json = serde_json::to_string(&settings).map_err(|e| e.to_string())?;
+    let encoded_settings = urlencoding::encode(&settings_json);
+
+    // Create date widget window with settings
+    let widget_url = format!("date-widget.html?settings={}", encoded_settings);
+
     let date_window = tauri::WebviewWindowBuilder::new(
         &app,
         window_label,
-        tauri::WebviewUrl::App("date-widget.html".into()),
+        WebviewUrl::App(widget_url.into()),
     )
     .title("Date Widget")
     .minimizable(false)
@@ -110,4 +119,16 @@ pub async fn close_date_widget(state: State<'_, AppState>, app: AppHandle<Wry>) 
         date_widgets.remove("current");
     }
     Ok("Date widget closed".to_string())
+}
+
+#[tauri::command]
+pub async fn update_date_widget(
+    state: State<'_, AppState>, 
+    app: AppHandle<Wry>,
+    settings: DateWidgetSettings
+) -> Result<String, String> {
+    // Close existing widget and create new one with updated settings
+    let _ = close_date_widget(state.clone(), app.clone()).await;
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    create_date_widget(app, state, settings).await
 }

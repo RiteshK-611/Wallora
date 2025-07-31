@@ -55,7 +55,7 @@ fn handle_tray_menu_event(app: &AppHandle<Wry>, event_id: &str) {
             let app_clone = app.clone();
             tauri::async_runtime::spawn(async move {
                 if let Some(state) = app_clone.try_state::<AppState>() {
-                    let _ = crate::commands::create_date_widget(app_clone.clone(), state).await;
+                    let _ = crate::commands::create_date_widget(app_clone.clone(), state, None).await;
                 }
             });
         }

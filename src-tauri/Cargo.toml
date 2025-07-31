@@ -1,7 +1,7 @@
 [package]
-name = "wallpaper-manager"
+name = "livelayer"
 version = "1.0.0"
-description = "A modern wallpaper manager with video support"
+description = "Premium wallpaper experience with dynamic backgrounds and widgets"
 authors = ["You"]
 edition = "2021"
 
