@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { DateWidgetSettings, FontOption } from '../types/wallpaper';
 
@@ -26,10 +26,11 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
         await invoke('close_date_widget');
         onSettingsChange({ ...settings, enabled: false });
       } else {
+        const newSettings = { ...settings, enabled: true };
         await invoke('create_date_widget', { 
-          settings: settings 
+          settings: newSettings 
         });
-        onSettingsChange({ ...settings, enabled: true });
+        onSettingsChange(newSettings);
       }
     } catch (error) {
       console.error('Error toggling date widget:', error);
@@ -51,20 +52,6 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
       }
     }
   };
-
-  // Update widget when settings change
-  useEffect(() => {
-    if (settings.enabled) {
-      const updateWidget = async () => {
-        try {
-          await invoke('update_date_widget', { settings });
-        } catch (error) {
-          console.error('Error updating widget with new settings:', error);
-        }
-      };
-      updateWidget();
-    }
-  }, [settings]);
 
   return (
     <div className="date-widget-container">
@@ -104,8 +91,8 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
             <label className="toggle-switch">
               <input
                 type="checkbox"
-                checked={settings.showTime}
-                onChange={(e) => handleSettingChange('showTime', e.target.checked)}
+                checked={settings.show_time}
+                onChange={(e) => handleSettingChange('show_time', e.target.checked)}
               />
               <span className="toggle-slider"></span>
             </label>
@@ -116,8 +103,8 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
             <label className="toggle-switch">
               <input
                 type="checkbox"
-                checked={settings.boldText}
-                onChange={(e) => handleSettingChange('boldText', e.target.checked)}
+                checked={settings.bold_text}
+                onChange={(e) => handleSettingChange('bold_text', e.target.checked)}
               />
               <span className="toggle-slider"></span>
             </label>

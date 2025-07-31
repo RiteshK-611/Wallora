@@ -39,15 +39,7 @@
             transform-origin: center;
         }
         
-        .widget-container.locked {
-            -webkit-app-region: no-drag;
-            cursor: default;
-        }
-        
-        .widget-container:not(.locked) {
-            -webkit-app-region: drag;
-            cursor: move;
-        }
+
         
         .day-name {
             font-size: 3.5rem;
@@ -93,53 +85,53 @@
         }
         
         /* Font families */
-        .font-megrim {
-            font-family: 'Megrim', cursive;
+        .font-megrim, .font-megrim * {
+            font-family: 'Megrim', cursive !important;
         }
         
-        .font-major-mono {
-            font-family: 'Major Mono Display', monospace;
+        .font-major-mono, .font-major-mono * {
+            font-family: 'Major Mono Display', monospace !important;
         }
         
-        .font-lment {
-            font-family: 'Lment-v02', sans-serif;
+        .font-lment-v02, .font-lment-v02 * {
+            font-family: 'Lment-v02', sans-serif !important;
         }
         
-        .font-kapiler {
-            font-family: 'Kapiler-Regular', sans-serif;
+        .font-kapiler-regular, .font-kapiler-regular * {
+            font-family: 'Kapiler-Regular', sans-serif !important;
         }
         
-        .font-arial {
-            font-family: 'Arial', sans-serif;
+        .font-arial, .font-arial * {
+            font-family: 'Arial', sans-serif !important;
         }
         
-        .font-times {
-            font-family: 'Times New Roman', serif;
+        .font-times-new-roman, .font-times-new-roman * {
+            font-family: 'Times New Roman', serif !important;
         }
         
         /* Alignment classes */
         .align-left {
-            text-align: left;
+            text-align: left !important;
         }
         
         .align-center {
-            text-align: center;
+            text-align: center !important;
         }
         
         .align-right {
-            text-align: right;
+            text-align: right !important;
         }
         
         /* Bold text */
         .bold-text .day-name,
         .bold-text .date,
         .bold-text .time {
-            font-weight: bold;
+            font-weight: bold !important;
         }
     </style>
 </head>
 <body>
-    <div class="widget-container" id="widgetContainer">
+    <div class="widget-container" id="widgetContainer" data-tauri-drag-region>
         <div class="day-name" id="dayName">WEDNESDAY</div>
         <div class="date-info" id="dateInfo">
             <div class="date" id="dateText">13 MAR 2024</div>
@@ -151,8 +143,8 @@
         let settings = {
             enabled: true,
             locked: false,
-            showTime: true,
-            boldText: false,
+            show_time: true,
+            bold_text: false,
             scale: 1,
             color: '#FFD700',
             font: 'Megrim',
@@ -183,45 +175,62 @@
             const dateText = document.getElementById('dateText');
             const timeText = document.getElementById('timeText');
 
+            // Clear existing classes
+            container.className = 'widget-container';
+            dayName.className = 'day-name';
+            dateText.className = 'date';
+            timeText.className = 'time';
+            dateInfo.className = 'date-info';
+
             // Apply scale
             container.style.transform = `scale(${settings.scale})`;
 
-            // Apply color
-            dayName.style.color = settings.color;
+            // Apply color - override gradient for day name
+            if (settings.color && settings.color !== '#FFD700') {
+                dayName.style.background = 'none';
+                dayName.style.webkitBackgroundClip = 'unset';
+                dayName.style.webkitTextFillColor = settings.color;
+                dayName.style.color = settings.color;
+            } else {
+                // Reset to gradient
+                dayName.style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
+                dayName.style.webkitBackgroundClip = 'text';
+                dayName.style.webkitTextFillColor = 'transparent';
+                dayName.style.color = 'transparent';
+            }
             dateText.style.color = settings.color;
             timeText.style.color = settings.color;
 
             // Apply font
-            const fontClass = `font-${settings.font.toLowerCase().replace(/\s+/g, '-').replace('major-mono-display', 'major-mono')}`;
-            dayName.className = `day-name ${fontClass}`;
-            dateText.className = `date ${fontClass}`;
-            timeText.className = `time ${fontClass}`;
+            const fontClass = `font-${settings.font.toLowerCase().replace(/\s+/g, '-')}`;
+            container.classList.add(fontClass);
 
             // Apply alignment
             const alignClass = `align-${settings.alignment}`;
-            dateInfo.className = `date-info ${alignClass}`;
+            dateInfo.classList.add(alignClass);
 
             // Apply bold text
-            if (settings.boldText) {
+            if (settings.bold_text) {
                 container.classList.add('bold-text');
-            } else {
-                container.classList.remove('bold-text');
             }
 
-            // Apply lock state
+            // Apply lock state - toggle data-tauri-drag-region attribute
             if (settings.locked) {
-                container.classList.add('locked');
+                container.removeAttribute('data-tauri-drag-region');
+                container.style.cursor = 'default';
             } else {
-                container.classList.remove('locked');
+                container.setAttribute('data-tauri-drag-region', '');
+                container.style.cursor = 'move';
             }
 
             // Show/hide time
-            if (settings.showTime) {
-                timeText.classList.remove('hidden');
-            } else {
+            if (!settings.show_time) {
                 timeText.classList.add('hidden');
             }
         }
+
+        // Make applySettings globally accessible for updates
+        window.applySettings = applySettings;
 
         // Update date and time
         function updateDateTime() {

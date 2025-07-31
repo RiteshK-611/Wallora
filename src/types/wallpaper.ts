@@ -15,8 +15,8 @@ export interface WallpaperSettings {
 export interface DateWidgetSettings {
   enabled: boolean;
   locked: boolean;
-  showTime: boolean;
-  boldText: boolean;
+  show_time: boolean;
+  bold_text: boolean;
   scale: number;
   color: string;
   font: string;

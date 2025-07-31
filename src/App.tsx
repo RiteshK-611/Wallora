@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import WallpaperManager from './components/WallpaperManager';
 import DateWidget from './components/DateWidget';
@@ -17,8 +17,8 @@ function App() {
   const [dateWidgetSettings, setDateWidgetSettings] = useState<DateWidgetSettings>({
     enabled: false,
     locked: false,
-    showTime: true,
-    boldText: false,
+    show_time: true,
+    bold_text: false,
     scale: 1,
     color: '#FFD700',
     font: 'Megrim',

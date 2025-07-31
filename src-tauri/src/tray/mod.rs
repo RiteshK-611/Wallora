@@ -5,6 +5,7 @@ use tauri::{
 };
 use crate::state::AppState;
 use crate::commands::stop_video_wallpaper;
+use crate::types::DateWidgetSettings;
 
 pub fn create_tray_menu(app: &tauri::App) -> tauri::Result<()> {
     // Create tray menu
@@ -55,7 +56,18 @@ fn handle_tray_menu_event(app: &AppHandle<Wry>, event_id: &str) {
             let app_clone = app.clone();
             tauri::async_runtime::spawn(async move {
                 if let Some(state) = app_clone.try_state::<AppState>() {
-                    let _ = crate::commands::create_date_widget(app_clone.clone(), state, None).await;
+                    // Create default settings for tray toggle
+                    let default_settings = DateWidgetSettings {
+                        enabled: true,
+                        locked: false,
+                        show_time: true,
+                        bold_text: false,
+                        scale: 1.0,
+                        color: "#FFFFFF".to_string(),
+                        font: "Megrim".to_string(),
+                        alignment: "center".to_string(),
+                    };
+                    let _ = crate::commands::create_date_widget(app_clone.clone(), state, default_settings).await;
                 }
             });
         }
