@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2.1.0",
-  "productName": "Wallpaper Manager",
+  "productName": "LiveLayer",
   "version": "1.0.0",
-  "identifier": "com.wallpaper.manager",
+  "identifier": "com.livelayer.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
@@ -14,12 +14,22 @@
     "targets": "all",
     "icon": ["icons/icon.ico", "icons/icon.png"],
     "category": "Utility",
-    "shortDescription": "Desktop wallpaper manager",
-    "longDescription": "A modern wallpaper manager with video and static image support",
+    "shortDescription": "Premium wallpaper experience",
+    "longDescription": "A premium wallpaper manager with dynamic backgrounds, live videos, and customizable widgets",
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
-      "timestampUrl": ""
+      "timestampUrl": "",
+      "wix": {
+        "language": "en-US",
+        "template": "main.wxs",
+        "fragmentPaths": [],
+        "componentGroupRefs": [],
+        "componentRefs": [],
+        "featureGroupRefs": [],
+        "featureRefs": [],
+        "mergeRefs": []
+      }
     },
     "resources": [],
     "externalBin": [],
@@ -31,12 +41,12 @@
     "windows": [
       {
         "label": "main",
-        "title": "Wallpaper Manager",
+        "title": "LiveLayer",
         "width": 900,
         "height": 700,
         "minWidth": 600,
         "minHeight": 400,
-        "visible": false,
+        "visible": true,
         "decorations": true,
         "transparent": false,
         "resizable": true,

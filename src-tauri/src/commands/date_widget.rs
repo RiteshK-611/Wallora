@@ -1,11 +1,13 @@
 use tauri::{AppHandle, State, Wry};
 use crate::state::AppState;
+use crate::types::DateWidgetSettings;
 use tauri::Manager;
 
 #[tauri::command]
 pub async fn create_date_widget(
     app: AppHandle<Wry>,
     state: State<'_, AppState>,
+    _settings: Option<DateWidgetSettings>,
 ) -> Result<String, String> {
     // Create unique window label for date widget
     let window_label = "date-widget";
@@ -110,4 +112,17 @@ pub async fn close_date_widget(state: State<'_, AppState>, app: AppHandle<Wry>) 
         date_widgets.remove("current");
     }
     Ok("Date widget closed".to_string())
+}
+
+#[tauri::command]
+pub async fn update_date_widget(
+    state: State<'_, AppState>, 
+    app: AppHandle<Wry>,
+    settings: DateWidgetSettings
+) -> Result<String, String> {
+    // For now, we'll recreate the widget with new settings
+    // In a more advanced implementation, we could send messages to update the existing widget
+    let _ = close_date_widget(state.clone(), app.clone()).await;
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    create_date_widget(app, state, Some(settings)).await
 }

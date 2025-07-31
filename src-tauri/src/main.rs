@@ -10,6 +10,7 @@ mod tray;
 use state::AppState;
 use commands::*;
 use tray::create_tray_menu;
+use tauri::Manager;
 
 fn main() {
     let app_state = AppState::default();
@@ -21,6 +22,13 @@ fn main() {
         .manage(app_state)
         .setup(|app| {
             create_tray_menu(app)?;
+            
+            // Show main window on first launch
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+            
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -34,7 +42,8 @@ fn main() {
             create_date_widget,
             hide_date_widget,
             show_date_widget,
-            close_date_widget
+            close_date_widget,
+            update_date_widget
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

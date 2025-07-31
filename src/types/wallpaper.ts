@@ -11,3 +11,21 @@ export interface WallpaperSettings {
   randomOrder: boolean;
   pauseOnFullscreen: boolean;
 }
+
+export interface DateWidgetSettings {
+  enabled: boolean;
+  locked: boolean;
+  showTime: boolean;
+  boldText: boolean;
+  scale: number;
+  color: string;
+  font: string;
+  alignment: 'left' | 'center' | 'right';
+}
+
+export interface FontOption {
+  name: string;
+  value: string;
+  type: 'google' | 'local';
+  url?: string;
+}
