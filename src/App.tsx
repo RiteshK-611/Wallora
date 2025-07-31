@@ -2,13 +2,11 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import WallpaperManager from './components/WallpaperManager';
 import DateWidget from './components/DateWidget';
-import SetupScreen from './components/SetupScreen';
 import { WallpaperSettings, DateWidgetSettings } from './types/wallpaper';
 import './index.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'wallpaper' | 'datewidget'>('wallpaper');
-  const [showSetup, setShowSetup] = useState(false);
   const [wallpaperSettings, setWallpaperSettings] = useState<WallpaperSettings>({
     autoChange: false,
     interval: 30,
@@ -27,19 +25,6 @@ function App() {
     alignment: 'center',
   });
 
-  useEffect(() => {
-    // Check if this is the first run
-    const isFirstRun = localStorage.getItem('livelayer-setup') === null;
-    if (isFirstRun) {
-      setShowSetup(true);
-    }
-  }, []);
-
-  const handleSetupComplete = () => {
-    localStorage.setItem('livelayer-setup', 'completed');
-    setShowSetup(false);
-  };
-
   const hideWindow = async () => {
     try {
       await invoke('hide_main_window');
@@ -47,10 +32,6 @@ function App() {
       console.error('Error hiding window:', error);
     }
   };
-
-  if (showSetup) {
-    return <SetupScreen onComplete={handleSetupComplete} />;
-  }
 
   return (
     <div className="app">
@@ -61,7 +42,7 @@ function App() {
         </div>
         <div className="header-actions">
           <button onClick={hideWindow} className="btn btn-ghost">
-            <span className="btn-icon">⬇️</span>
+            <span className="btn-icon">−</span>
             Minimize to Tray
           </button>
         </div>
@@ -72,14 +53,14 @@ function App() {
           className={`tab-button ${activeTab === 'wallpaper' ? 'active' : ''}`}
           onClick={() => setActiveTab('wallpaper')}
         >
-          <span className="tab-icon">🖼️</span>
+          <span className="tab-icon">📷</span>
           Wallpaper Manager
         </button>
         <button
           className={`tab-button ${activeTab === 'datewidget' ? 'active' : ''}`}
           onClick={() => setActiveTab('datewidget')}
         >
-          <span className="tab-icon">📅</span>
+          <span className="tab-icon">📆</span>
           Date Widget
         </button>
       </nav>

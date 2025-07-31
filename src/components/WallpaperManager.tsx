@@ -108,9 +108,6 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
             preload="metadata"
             className="preview-media"
           />
-          <span className="file-type-badge video">
-            {wallpaper.file_type.toUpperCase()}
-          </span>
         </div>
       );
     }
@@ -123,7 +120,6 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
             alt={wallpaper.name}
             className="preview-media"
           />
-          <span className="file-type-badge gif">GIF</span>
         </div>
       );
     }
@@ -135,25 +131,20 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
           alt={wallpaper.name}
           className="preview-media"
         />
-        <span className="file-type-badge image">
-          {wallpaper.file_type.toUpperCase()}
-        </span>
       </div>
     );
   };
 
   return (
-    <div className="wallpaper-manager">
-      <div className="manager-header">
-        <div className="header-info">
+    <div className="wallpaper-container">
+      <div className="wallpaper-section">
+        <div className="section-header">
           <h2>Wallpaper Manager</h2>
-          <p>Manage your dynamic wallpapers and live backgrounds</p>
         </div>
-      </div>
 
-      <div className="slideshow-settings">
-        <div className="setting-group">
-          <div className="setting-header">
+        <div className="slideshow-controls">
+          <div className="control-row">
+            <span className="control-label">Randomize slideshow</span>
             <label className="toggle-switch">
               <input
                 type="checkbox"
@@ -162,129 +153,102 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
               />
               <span className="toggle-slider"></span>
             </label>
-            <div className="setting-info">
-              <h3>Randomize Slideshow</h3>
-              <p>Automatically change wallpapers at set intervals</p>
-            </div>
           </div>
 
-          {settings.autoChange && (
-            <div className="slideshow-options">
-              <div className="time-inputs">
-                <label>Change wallpaper every</label>
-                <div className="time-controls">
-                  <div className="time-input">
-                    <input
-                      type="number"
-                      min="0"
-                      max="23"
-                      value={Math.floor(settings.interval / 60)}
-                      onChange={(e) => {
-                        const hours = parseInt(e.target.value) || 0;
-                        const minutes = settings.interval % 60;
-                        onSettingsChange({ ...settings, interval: hours * 60 + minutes });
-                      }}
-                    />
-                    <span>hours</span>
-                  </div>
-                  <div className="time-input">
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      value={settings.interval % 60}
-                      onChange={(e) => {
-                        const minutes = parseInt(e.target.value) || 0;
-                        const hours = Math.floor(settings.interval / 60);
-                        onSettingsChange({ ...settings, interval: hours * 60 + minutes });
-                      }}
-                    />
-                    <span>minutes</span>
-                  </div>
-                </div>
+          <div className="time-control-row">
+            <span className="control-label">Change wallpaper every</span>
+            <div className="time-inputs">
+              <div className="time-input-group">
+                <span className="time-label">hours:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="23"
+                  value={Math.floor(settings.interval / 3600)}
+                  onChange={(e) => {
+                    const hours = parseInt(e.target.value) || 0;
+                    const minutes = Math.floor((settings.interval % 3600) / 60);
+                    const seconds = settings.interval % 60;
+                    onSettingsChange({ ...settings, interval: hours * 3600 + minutes * 60 + seconds });
+                  }}
+                  className="time-input"
+                />
               </div>
+              <div className="time-input-group">
+                <span className="time-label">minutes:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={Math.floor((settings.interval % 3600) / 60)}
+                  onChange={(e) => {
+                    const minutes = parseInt(e.target.value) || 0;
+                    const hours = Math.floor(settings.interval / 3600);
+                    const seconds = settings.interval % 60;
+                    onSettingsChange({ ...settings, interval: hours * 3600 + minutes * 60 + seconds });
+                  }}
+                  className="time-input"
+                />
+              </div>
+              <div className="time-input-group">
+                <span className="time-label">seconds:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={settings.interval % 60}
+                  onChange={(e) => {
+                    const seconds = parseInt(e.target.value) || 0;
+                    const hours = Math.floor(settings.interval / 3600);
+                    const minutes = Math.floor((settings.interval % 3600) / 60);
+                    onSettingsChange({ ...settings, interval: hours * 3600 + minutes * 60 + seconds });
+                  }}
+                  className="time-input"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
-              <div className="setting-item">
-                <label className="setting-label">
-                  <input
-                    type="checkbox"
-                    checked={settings.randomOrder}
-                    onChange={(e) => onSettingsChange({ ...settings, randomOrder: e.target.checked })}
-                  />
-                  <span className="checkmark"></span>
-                  Random order
-                </label>
-              </div>
+        <div className="wallpapers-section">
+          <div className="wallpapers-header">
+            <span className="wallpapers-label">Wallpapers</span>
+            <button className="add-wallpapers-btn" onClick={() => {
+              // This will be handled by FileSelector component
+            }}>
+              📁
+            </button>
+          </div>
+
+          {wallpapers.length === 0 ? (
+            <div className="empty-wallpapers">
+              <p>Empty slideshow, using theme's background instead.</p>
+            </div>
+          ) : (
+            <div className="wallpapers-list">
+              {wallpapers.map((wallpaper) => (
+                <div key={wallpaper.path} className="wallpaper-item">
+                  <div className="wallpaper-preview-small" onClick={() => handleSetWallpaper(wallpaper)}>
+                    {renderPreview(wallpaper)}
+                  </div>
+                  <span className="wallpaper-name">{wallpaper.name}</span>
+                  <button 
+                    className="delete-wallpaper-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteWallpaper(wallpaper.path);
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
       <FileSelector onWallpapersAdd={handleAddWallpapers} />
-      
-      <div className="controls-bar">
-        <button 
-          onClick={handleStopVideo} 
-          className="btn btn-danger"
-          disabled={loading || !currentWallpaper || !wallpapers.find(w => w.path === currentWallpaper && (isVideoFile(w.file_type) || isGifFile(w.file_type)))}
-        >
-          <span className="btn-icon">🛑</span>
-          Stop Live Wallpaper
-        </button>
-        
-        <div className="current-wallpaper-info">
-          {currentWallpaper && (
-            <div className="current-info">
-              <span className="current-label">Current:</span>
-              <span className="current-name">{getWallpaperByPath(currentWallpaper)?.name || 'Unknown'}</span>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="wallpaper-grid">
-        {loading && <div className="loading">⚡ Processing wallpaper...</div>}
-        
-        {wallpapers.length === 0 && !loading && (
-          <div className="empty-state">
-            <div className="empty-icon">🖼️</div>
-            <h3>No wallpapers added</h3>
-            <p>Click "Add Wallpapers" to select your favorite wallpapers and start customizing your desktop.</p>
-          </div>
-        )}
-
-        {wallpapers.map((wallpaper) => (
-          <div
-            key={wallpaper.path}
-            className={`wallpaper-card ${currentWallpaper === wallpaper.path ? 'active' : ''}`}
-          >
-            <div className="wallpaper-preview" onClick={() => handleSetWallpaper(wallpaper)}>
-              {renderPreview(wallpaper)}
-              {currentWallpaper === wallpaper.path && (
-                <div className="active-indicator">
-                  <span className="active-icon">✨</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="wallpaper-info">
-              <h4 title={wallpaper.name}>{wallpaper.name}</h4>
-              <p className="file-size">{formatFileSize(wallpaper.size)}</p>
-            </div>
-            
-            <button 
-              className="delete-button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteWallpaper(wallpaper.path);
-              }}
-              title="Remove wallpaper"
-            >
-              🗑️
-            </button>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

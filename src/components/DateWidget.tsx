@@ -26,7 +26,11 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
         await invoke('close_date_widget');
         onSettingsChange({ ...settings, enabled: false });
       } else {
-        await invoke('create_date_widget', { settings });
+        await invoke('create_date_widget', { 
+          app: null, 
+          state: null, 
+          settings: settings 
+        });
         onSettingsChange({ ...settings, enabled: true });
       }
     } catch (error) {
@@ -47,153 +51,115 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
   };
 
   return (
-    <div className="date-widget-manager">
-      <div className="widget-header">
-        <div className="header-info">
-          <h2>Date Widget</h2>
-          <p>Customize your desktop date and time display</p>
+    <div className="date-widget-container">
+      <div className="widget-section">
+        <div className="section-header">
+          <h2>Date widget</h2>
         </div>
-        <div className="widget-toggle">
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={settings.enabled}
-              onChange={handleToggleWidget}
-              disabled={loading}
-            />
-            <span className="toggle-slider"></span>
-          </label>
-          <span className="toggle-label">
-            {settings.enabled ? 'Enabled' : 'Disabled'}
-          </span>
-        </div>
-      </div>
+        
+        <div className="widget-controls">
+          <div className="control-row">
+            <span className="control-label">Enable this widget</span>
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.enabled}
+                onChange={handleToggleWidget}
+                disabled={loading}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
 
-      <div className="widget-settings">
-        <div className="settings-grid">
-          <div className="setting-group">
-            <h3>Display Options</h3>
-            
-            <div className="setting-item">
-              <label className="setting-label">
-                <input
-                  type="checkbox"
-                  checked={settings.showTime}
-                  onChange={(e) => handleSettingChange('showTime', e.target.checked)}
-                />
-                <span className="checkmark"></span>
-                Show Time
-              </label>
-            </div>
+          <div className="control-row">
+            <span className="control-label">Lock widget</span>
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.locked}
+                onChange={(e) => handleSettingChange('locked', e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
 
-            <div className="setting-item">
-              <label className="setting-label">
-                <input
-                  type="checkbox"
-                  checked={settings.boldText}
-                  onChange={(e) => handleSettingChange('boldText', e.target.checked)}
-                />
-                <span className="checkmark"></span>
-                Bold Text
-              </label>
-            </div>
+          <div className="control-row">
+            <span className="control-label">Time</span>
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.showTime}
+                onChange={(e) => handleSettingChange('showTime', e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
 
-            <div className="setting-item">
-              <label className="setting-label">
-                <input
-                  type="checkbox"
-                  checked={settings.locked}
-                  onChange={(e) => handleSettingChange('locked', e.target.checked)}
-                />
-                <span className="checkmark"></span>
-                Lock Position
-              </label>
+          <div className="control-row">
+            <span className="control-label">Bold text</span>
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={settings.boldText}
+                onChange={(e) => handleSettingChange('boldText', e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div className="control-row">
+            <span className="control-label">Scale</span>
+            <div className="scale-control">
+              <input
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={settings.scale}
+                onChange={(e) => handleSettingChange('scale', parseFloat(e.target.value))}
+                className="scale-slider"
+              />
             </div>
           </div>
 
-          <div className="setting-group">
-            <h3>Appearance</h3>
-            
-            <div className="setting-item">
-              <label className="setting-label">Scale</label>
-              <div className="slider-container">
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.1"
-                  value={settings.scale}
-                  onChange={(e) => handleSettingChange('scale', parseFloat(e.target.value))}
-                  className="slider"
-                />
-                <span className="slider-value">{settings.scale}x</span>
-              </div>
-            </div>
-
-            <div className="setting-item">
-              <label className="setting-label">Color</label>
-              <div className="color-picker-container">
-                <input
-                  type="color"
-                  value={settings.color}
-                  onChange={(e) => handleSettingChange('color', e.target.value)}
-                  className="color-picker"
-                />
-                <span className="color-value">{settings.color}</span>
-              </div>
-            </div>
-
-            <div className="setting-item">
-              <label className="setting-label">Font</label>
-              <select
-                value={settings.font}
-                onChange={(e) => handleSettingChange('font', e.target.value)}
-                className="font-select"
-              >
-                {fontOptions.map((font) => (
-                  <option key={font.value} value={font.value}>
-                    {font.name} {font.type === 'google' ? '(Google)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="setting-item">
-              <label className="setting-label">Alignment</label>
-              <div className="alignment-buttons">
-                {(['left', 'center', 'right'] as const).map((align) => (
-                  <button
-                    key={align}
-                    className={`alignment-btn ${settings.alignment === align ? 'active' : ''}`}
-                    onClick={() => handleSettingChange('alignment', align)}
-                  >
-                    {align === 'left' && '⬅️'}
-                    {align === 'center' && '↔️'}
-                    {align === 'right' && '➡️'}
-                  </button>
-                ))}
-              </div>
+          <div className="control-row">
+            <span className="control-label">Change color</span>
+            <div className="color-control">
+              <input
+                type="color"
+                value={settings.color}
+                onChange={(e) => handleSettingChange('color', e.target.value)}
+                className="color-picker"
+              />
             </div>
           </div>
-        </div>
 
-        <div className="widget-preview">
-          <h3>Preview</h3>
-          <div 
-            className="preview-container"
-            style={{
-              color: settings.color,
-              fontFamily: settings.font,
-              fontWeight: settings.boldText ? 'bold' : 'normal',
-              textAlign: settings.alignment,
-              transform: `scale(${settings.scale})`,
-            }}
-          >
-            <div className="preview-day">MONDAY</div>
-            <div className="preview-date">January 27, 2025</div>
-            {settings.showTime && (
-              <div className="preview-time">- 2:17 PM -</div>
-            )}
+          <div className="control-row">
+            <span className="control-label">Date font</span>
+            <select
+              value={settings.font}
+              onChange={(e) => handleSettingChange('font', e.target.value)}
+              className="font-select"
+            >
+              {fontOptions.map((font) => (
+                <option key={font.value} value={font.value}>
+                  {font.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="control-row">
+            <span className="control-label">Align</span>
+            <select
+              value={settings.alignment}
+              onChange={(e) => handleSettingChange('alignment', e.target.value)}
+              className="align-select"
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
           </div>
         </div>
       </div>

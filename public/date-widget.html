@@ -116,16 +116,13 @@
             // Date
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'];
-            const dateText = `${monthNames[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+            const dateText = `${now.getDate().toString().padStart(2, '0')} ${monthNames[now.getMonth()].substring(0, 3).toUpperCase()} ${now.getFullYear()}`;
             document.getElementById('dateText').textContent = dateText;
             
             // Time
             let hours = now.getHours();
             const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // 0 should be 12
-            const timeText = `- ${hours}:${minutes} ${ampm} -`;
+            const timeText = `${hours.toString().padStart(2, '0')}:${minutes}`;
             document.getElementById('timeText').textContent = timeText;
         }
 
