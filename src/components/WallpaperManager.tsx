@@ -148,18 +148,6 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
       );
     }
 
-    if (isGifFile(wallpaper.file_type)) {
-      return (
-        <div className="media-preview">
-          <img
-            src={convertFileSrc(wallpaper.path)}
-            alt={wallpaper.name}
-            className="preview-media"
-          />
-        </div>
-      );
-    }
-
     return (
       <div className="media-preview">
         <img
@@ -174,9 +162,9 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
   return (
     <div className="wallpaper-container">
       <div className="wallpaper-section">
-        <div className="section-header">
+        {/* <div className="section-header">
           <h2>Wallpaper Manager</h2>
-        </div>
+        </div> */}
 
         <div className="slideshow-controls">
           <div className="control-row">

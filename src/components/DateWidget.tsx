@@ -56,9 +56,9 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
   return (
     <div className="date-widget-container">
       <div className="widget-section">
-        <div className="section-header">
+        {/* <div className="section-header">
           <h2>Date widget</h2>
-        </div>
+        </div> */}
         
         <div className="widget-controls">
           <div className="control-row">

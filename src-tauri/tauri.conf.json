@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2.1.0",
-  "productName": "LiveLayer",
+  "productName": "Wallora",
   "version": "1.0.0",
-  "identifier": "com.livelayer.wallpaper",
+  "identifier": "com.wallora.wallpaper",
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
@@ -12,7 +12,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": ["icons/icon.ico", "icons/icon.png"],
+    "icon": ["icons/wallora.ico", "icons/wallora.png"],
     "category": "Utility",
     "shortDescription": "Premium wallpaper experience",
     "longDescription": "A premium wallpaper manager with dynamic backgrounds, live videos, and customizable widgets",
@@ -41,16 +41,19 @@
     "windows": [
       {
         "label": "main",
-        "title": "LiveLayer",
-        "width": 900,
-        "height": 700,
+        "title": "Wallora",
+        "width": 800,
+        "height": 500,
         "minWidth": 600,
         "minHeight": 400,
         "visible": true,
         "decorations": true,
         "transparent": false,
         "resizable": true,
-        "center": true
+        "center": true,
+        "closable": false,
+        "maximizable": false,
+        "minimizable": false
       }
     ],
     "security": {

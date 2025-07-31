@@ -1,265 +1,322 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Date Widget</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Megrim&family=Major+Mono+Display&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Megrim&family=Major+Mono+Display&display=swap"
+      rel="stylesheet" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            width: 400px;
-            height: 200px;
-            background: transparent !important;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
-        .widget-container {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            transform-origin: center;
-        }
-        
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        
-        .day-name {
-            font-size: 3.5rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 8px;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-            z-index: 1;
-            font-family: 'Megrim', cursive;
-        }
-        
-        .date-info {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .date {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #FFD700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            font-family: 'Megrim', cursive;
-        }
-        
-        .time {
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: #FFD700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            font-family: 'Megrim', cursive;
-        }
-        
-        .time.hidden {
-            display: none;
-        }
-        
-        /* Font families */
-        .font-megrim, .font-megrim * {
-            font-family: 'Megrim', cursive !important;
-        }
-        
-        .font-major-mono, .font-major-mono * {
-            font-family: 'Major Mono Display', monospace !important;
-        }
-        
-        .font-lment-v02, .font-lment-v02 * {
-            font-family: 'Lment-v02', sans-serif !important;
-        }
-        
-        .font-kapiler-regular, .font-kapiler-regular * {
-            font-family: 'Kapiler-Regular', sans-serif !important;
-        }
-        
-        .font-arial, .font-arial * {
-            font-family: 'Arial', sans-serif !important;
-        }
-        
-        .font-times-new-roman, .font-times-new-roman * {
-            font-family: 'Times New Roman', serif !important;
-        }
-        
-        /* Alignment classes */
-        .align-left {
-            text-align: left !important;
-        }
-        
-        .align-center {
-            text-align: center !important;
-        }
-        
-        .align-right {
-            text-align: right !important;
-        }
-        
-        /* Bold text */
-        .bold-text .day-name,
-        .bold-text .date,
-        .bold-text .time {
-            font-weight: bold !important;
-        }
+      @font-face {
+        font-family: "Lment-v02";
+        src: url("../src/assets/fonts/Lment-v02-500.otf") format("opentype");
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Kapiler-Regular";
+        src: url("../src/assets/fonts/Kapiler-Regular-400.otf")
+          format("opentype");
+
+        font-display: swap;
+      }
+
+      html,
+      body {
+        width: 400px;
+        height: 200px;
+        background: transparent !important;
+        overflow: hidden;
+        font-family: "Arial", sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .widget-container {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        transform-origin: center;
+      }
+
+      .day-name {
+        font-size: 3.5rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 8px;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, #ffd700, #ffa500);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        z-index: 1;
+        font-family: "Megrim", cursive;
+      }
+
+      .date-info {
+        text-align: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .date {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #ffd700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        font-family: "Roboto", sans-serif;
+        font-style: italic;
+      }
+
+      .time {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #ffd700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        font-family: "Roboto", sans-serif;
+      }
+
+      .time.hidden {
+        display: none;
+      }
+
+      /* Font families */
+      .font-megrim,
+      .font-megrim * {
+        font-family: "Megrim", cursive !important;
+      }
+
+      .font-major-mono-display,
+      .font-major-mono-display * {
+        font-family: "Major Mono Display", monospace !important;
+      }
+
+      .font-lment-v02,
+      .font-lment-v02 * {
+        font-family: "Lment-v02", sans-serif !important;
+      }
+
+      .font-kapiler-regular,
+      .font-kapiler-regular * {
+        font-family: "Kapiler-Regular", sans-serif !important;
+      }
+
+      .font-arial,
+      .font-arial * {
+        font-family: "Arial", sans-serif !important;
+      }
+
+      .font-times-new-roman,
+      .font-times-new-roman * {
+        font-family: "Times New Roman", serif !important;
+      }
+
+      /* Alignment classes */
+      .align-left {
+        text-align: left !important;
+      }
+
+      .align-center {
+        text-align: center !important;
+      }
+
+      .align-right {
+        text-align: right !important;
+      }
+
+      /* Bold text */
+      .bold-text .day-name,
+      .bold-text .date,
+      .bold-text .time {
+        font-weight: bold !important;
+      }
     </style>
-</head>
-<body>
-    <div class="widget-container" id="widgetContainer" data-tauri-drag-region>
+  </head>
+  <body>
+    <div class="widget-container" id="widgetContainer">
+      <div class="date-info" id="dateInfo">
         <div class="day-name" id="dayName">WEDNESDAY</div>
-        <div class="date-info" id="dateInfo">
-            <div class="date" id="dateText">13 MAR 2024</div>
-            <div class="time" id="timeText">16:20</div>
-        </div>
+        <div class="date" id="dateText">13 MAR 2024</div>
+        <div class="time" id="timeText">- 16:20 -</div>
+      </div>
     </div>
-    
+
     <script>
-        let settings = {
-            enabled: true,
-            locked: false,
-            show_time: true,
-            bold_text: false,
-            scale: 1,
-            color: '#FFD700',
-            font: 'Megrim',
-            alignment: 'center'
-        };
+      let settings = {
+        enabled: true,
+        locked: false,
+        show_time: true,
+        bold_text: false,
+        scale: 1,
+        color: "#FFD700",
+        font: "Megrim",
+        alignment: "center",
+      };
 
-        // Parse settings from URL
-        function parseSettings() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const settingsParam = urlParams.get('settings');
-            
-            if (settingsParam) {
-                try {
-                    const decodedSettings = decodeURIComponent(settingsParam);
-                    settings = JSON.parse(decodedSettings);
-                    console.log('Parsed settings:', settings);
-                } catch (error) {
-                    console.error('Error parsing settings:', error);
-                }
-            }
+      // Parse settings from URL
+      function parseSettings() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const settingsParam = urlParams.get("settings");
+
+        if (settingsParam) {
+          try {
+            const decodedSettings = decodeURIComponent(settingsParam);
+            settings = JSON.parse(decodedSettings);
+            console.log("Parsed settings:", settings);
+          } catch (error) {
+            console.error("Error parsing settings:", error);
+          }
+        }
+      }
+
+      // Apply settings to the widget
+      function applySettings() {
+        const container = document.getElementById("widgetContainer");
+        const dayName = document.getElementById("dayName");
+        const dateInfo = document.getElementById("dateInfo");
+        const dateText = document.getElementById("dateText");
+        const timeText = document.getElementById("timeText");
+
+        // Clear existing classes
+        container.className = "widget-container";
+        dayName.className = "day-name";
+        dateText.className = "date";
+        timeText.className = "time";
+        dateInfo.className = "date-info";
+
+        // Apply scale
+        container.style.transform = `scale(${settings.scale})`;
+
+        // Apply color - override gradient for day name
+        if (settings.color && settings.color !== "#FFD700") {
+          dayName.style.background = "none";
+          dayName.style.webkitBackgroundClip = "unset";
+          dayName.style.webkitTextFillColor = settings.color;
+          dayName.style.color = settings.color;
+        } else {
+          // Reset to gradient
+          dayName.style.background = "linear-gradient(45deg, #FFD700, #FFA500)";
+          dayName.style.webkitBackgroundClip = "text";
+          dayName.style.webkitTextFillColor = "transparent";
+          dayName.style.color = "transparent";
+        }
+        dateText.style.color = settings.color;
+        timeText.style.color = settings.color;
+
+        // Apply font
+        const fontClass = `font-${settings.font
+          .toLowerCase()
+          .replace(/\s+/g, "-")}`;
+        dayName.classList.add(fontClass);
+
+        // Apply alignment
+        const alignClass = `align-${settings.alignment}`;
+        dateInfo.classList.add(alignClass);
+
+        // Apply bold text
+        if (settings.bold_text) {
+          container.classList.add("bold-text");
         }
 
-        // Apply settings to the widget
-        function applySettings() {
-            const container = document.getElementById('widgetContainer');
-            const dayName = document.getElementById('dayName');
-            const dateInfo = document.getElementById('dateInfo');
-            const dateText = document.getElementById('dateText');
-            const timeText = document.getElementById('timeText');
-
-            // Clear existing classes
-            container.className = 'widget-container';
-            dayName.className = 'day-name';
-            dateText.className = 'date';
-            timeText.className = 'time';
-            dateInfo.className = 'date-info';
-
-            // Apply scale
-            container.style.transform = `scale(${settings.scale})`;
-
-            // Apply color - override gradient for day name
-            if (settings.color && settings.color !== '#FFD700') {
-                dayName.style.background = 'none';
-                dayName.style.webkitBackgroundClip = 'unset';
-                dayName.style.webkitTextFillColor = settings.color;
-                dayName.style.color = settings.color;
-            } else {
-                // Reset to gradient
-                dayName.style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
-                dayName.style.webkitBackgroundClip = 'text';
-                dayName.style.webkitTextFillColor = 'transparent';
-                dayName.style.color = 'transparent';
-            }
-            dateText.style.color = settings.color;
-            timeText.style.color = settings.color;
-
-            // Apply font
-            const fontClass = `font-${settings.font.toLowerCase().replace(/\s+/g, '-')}`;
-            container.classList.add(fontClass);
-
-            // Apply alignment
-            const alignClass = `align-${settings.alignment}`;
-            dateInfo.classList.add(alignClass);
-
-            // Apply bold text
-            if (settings.bold_text) {
-                container.classList.add('bold-text');
-            }
-
-            // Apply lock state - toggle data-tauri-drag-region attribute
-            if (settings.locked) {
-                container.removeAttribute('data-tauri-drag-region');
-                container.style.cursor = 'default';
-            } else {
-                container.setAttribute('data-tauri-drag-region', '');
-                container.style.cursor = 'move';
-            }
-
-            // Show/hide time
-            if (!settings.show_time) {
-                timeText.classList.add('hidden');
-            }
+        // Apply lock state - toggle data-tauri-drag-region attribute
+        if (settings.locked) {
+          if (container.hasAttribute("data-tauri-drag-region")) {
+            container.removeAttribute("data-tauri-drag-region");
+            dateInfo.removeAttribute("data-tauri-drag-region");
+            dayName.removeAttribute("data-tauri-drag-region");
+            dateText.removeAttribute("data-tauri-drag-region");
+            timeText.removeAttribute("data-tauri-drag-region");
+          }
+          container.style.cursor = "default";
+        } else {
+          if (!container.hasAttribute("data-tauri-drag-region")) {
+            container.setAttribute("data-tauri-drag-region", "");
+            dateInfo.setAttribute("data-tauri-drag-region", "");
+            dayName.setAttribute("data-tauri-drag-region", "");
+            dateText.setAttribute("data-tauri-drag-region", "");
+            timeText.setAttribute("data-tauri-drag-region", "");
+          }
+          container.style.cursor = "move";
         }
 
-        // Make applySettings globally accessible for updates
-        window.applySettings = applySettings;
-
-        // Update date and time
-        function updateDateTime() {
-            const now = new Date();
-            
-            // Day name
-            const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
-            document.getElementById('dayName').textContent = dayNames[now.getDay()];
-            
-            // Date in format: DD MMM YYYY
-            const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-            const dateText = `${now.getDate().toString().padStart(2, '0')} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-            document.getElementById('dateText').textContent = dateText;
-            
-            // Time in 24-hour format
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const timeText = `${hours}:${minutes}`;
-            document.getElementById('timeText').textContent = timeText;
+        // Show/hide time
+        if (!settings.show_time) {
+          timeText.classList.add("hidden");
         }
+      }
 
-        // Initialize
-        parseSettings();
-        applySettings();
-        updateDateTime();
-        setInterval(updateDateTime, 1000); // Update every second
+      // Make applySettings globally accessible for updates
+      window.applySettings = applySettings;
 
-        console.log('Date widget loaded successfully with settings:', settings);
+      // Update date and time
+      function updateDateTime() {
+        const now = new Date();
+
+        // Day name
+        const dayNames = [
+          "SUNDAY",
+          "MONDAY",
+          "TUESDAY",
+          "WEDNESDAY",
+          "THURSDAY",
+          "FRIDAY",
+          "SATURDAY",
+        ];
+        document.getElementById("dayName").textContent = dayNames[now.getDay()];
+
+        // Date in format: DD MMM YYYY
+        const monthNames = [
+          "JAN",
+          "FEB",
+          "MAR",
+          "APR",
+          "MAY",
+          "JUN",
+          "JUL",
+          "AUG",
+          "SEP",
+          "OCT",
+          "NOV",
+          "DEC",
+        ];
+        const dateText = `${now.getDate().toString().padStart(2, "0")} ${
+          monthNames[now.getMonth()]
+        } ${now.getFullYear()}`;
+        document.getElementById("dateText").textContent = dateText;
+
+        // Time in 24-hour format
+        const hours = now.getHours().toString().padStart(2, "0");
+        const minutes = now.getMinutes().toString().padStart(2, "0");
+        const timeText = `- ${hours}:${minutes} -`;
+        document.getElementById("timeText").textContent = timeText;
+      }
+
+      // Initialize
+      parseSettings();
+      applySettings();
+      updateDateTime();
+      setInterval(updateDateTime, 1000); // Update every second
+
+      console.log("Date widget loaded successfully with settings:", settings);
     </script>
-</body>
+  </body>
 </html>
