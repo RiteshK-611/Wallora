@@ -1,5 +1,5 @@
 {
-  "name": "livelayer",
+  "name": "wallora",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -10,7 +10,6 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.6.0",
     "@tauri-apps/plugin-dialog": "^2.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
