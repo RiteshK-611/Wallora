@@ -1,35 +1,40 @@
-import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import WallpaperManager from './components/WallpaperManager';
-import DateWidget from './components/DateWidget';
-import { WallpaperSettings, DateWidgetSettings } from './types/wallpaper';
-import './index.css';
+import { useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import WallpaperManager from "./components/WallpaperManager";
+import DateWidget from "./components/DateWidget";
+import { WallpaperSettings, DateWidgetSettings } from "./types/wallpaper";
+import "./index.css";
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'wallpaper' | 'datewidget'>('wallpaper');
-  const [wallpaperSettings, setWallpaperSettings] = useState<WallpaperSettings>({
-    autoChange: false,
-    interval: 30,
-    randomOrder: false,
-    pauseOnFullscreen: true,
-  });
+  const [activeTab, setActiveTab] = useState<"wallpaper" | "datewidget">(
+    "wallpaper"
+  );
+  const [wallpaperSettings, setWallpaperSettings] = useState<WallpaperSettings>(
+    {
+      autoChange: false,
+      interval: 30,
+      randomOrder: false,
+      pauseOnFullscreen: true,
+    }
+  );
 
-  const [dateWidgetSettings, setDateWidgetSettings] = useState<DateWidgetSettings>({
-    enabled: false,
-    locked: false,
-    show_time: true,
-    bold_text: false,
-    scale: 1,
-    color: '#FFD700',
-    font: 'Megrim',
-    alignment: 'center',
-  });
+  const [dateWidgetSettings, setDateWidgetSettings] =
+    useState<DateWidgetSettings>({
+      enabled: false,
+      locked: false,
+      show_time: true,
+      bold_text: false,
+      scale: 1,
+      color: "#FFD700",
+      font: "Megrim",
+      alignment: "center",
+    });
 
   const hideWindow = async () => {
     try {
-      await invoke('hide_main_window');
+      await invoke("hide_main_window");
     } catch (error) {
-      console.error('Error hiding window:', error);
+      console.error("Error hiding window:", error);
     }
   };
 
@@ -37,8 +42,15 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="header-left">
-          <h1>✨ LiveLayer</h1>
-          <p className="app-subtitle">Premium Wallpaper Experience</p>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <img
+              src="../src-tauri/icons/wallora.png"
+              alt="Wallora Logo"
+              style={{ width: "36px", height: "36px" }}
+            />
+            <h1>allora</h1>
+          </div>
+          {/* <p className="app-subtitle">Premium Wallpaper Experience</p> */}
         </div>
         <div className="header-actions">
           <button onClick={hideWindow} className="btn btn-ghost">
@@ -50,30 +62,28 @@ function App() {
 
       <nav className="tab-navigation">
         <button
-          className={`tab-button ${activeTab === 'wallpaper' ? 'active' : ''}`}
-          onClick={() => setActiveTab('wallpaper')}
-        >
+          className={`tab-button ${activeTab === "wallpaper" ? "active" : ""}`}
+          onClick={() => setActiveTab("wallpaper")}>
           <span className="tab-icon">📷</span>
           Wallpaper Manager
         </button>
         <button
-          className={`tab-button ${activeTab === 'datewidget' ? 'active' : ''}`}
-          onClick={() => setActiveTab('datewidget')}
-        >
+          className={`tab-button ${activeTab === "datewidget" ? "active" : ""}`}
+          onClick={() => setActiveTab("datewidget")}>
           <span className="tab-icon">📆</span>
           Date Widget
         </button>
       </nav>
 
       <main className="main-content">
-        {activeTab === 'wallpaper' && (
-          <WallpaperManager 
+        {activeTab === "wallpaper" && (
+          <WallpaperManager
             settings={wallpaperSettings}
             onSettingsChange={setWallpaperSettings}
           />
         )}
-        {activeTab === 'datewidget' && (
-          <DateWidget 
+        {activeTab === "datewidget" && (
+          <DateWidget
             settings={dateWidgetSettings}
             onSettingsChange={setDateWidgetSettings}
           />

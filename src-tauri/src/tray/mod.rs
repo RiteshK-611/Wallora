@@ -19,7 +19,7 @@ pub fn create_tray_menu(app: &tauri::App) -> tauri::Result<()> {
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
         .icon(app.default_window_icon().unwrap().clone())
-        .tooltip("Wallpaper Manager")
+        .tooltip("Wallora")
         .on_menu_event(move |app, event| {
             handle_tray_menu_event(app, event.id().as_ref());
         })
