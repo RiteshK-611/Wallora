@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -13,6 +13,63 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
   const [wallpapers, setWallpapers] = useState<WallpaperInfo[]>([]);
   const [currentWallpaper, setCurrentWallpaper] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [slideshowInterval, setSlideshowInterval] = useState<ReturnType<typeof setInterval> | null>(null);
+
+  // Load wallpapers from persistent state on component mount
+  useEffect(() => {
+    const loadWallpapers = async () => {
+      try {
+        const state = await invoke<any>('load_app_state');
+        if (state.wallpaper_list && state.wallpaper_list.length > 0) {
+          setWallpapers(state.wallpaper_list);
+        }
+      } catch (error) {
+        console.error('Error loading wallpapers:', error);
+      }
+    };
+    loadWallpapers();
+  }, []);
+
+  // Save wallpapers to persistent state whenever wallpapers change
+  useEffect(() => {
+    if (wallpapers.length > 0) {
+      invoke('save_wallpaper_list', { wallpapers })
+        .catch(error => console.error('Error saving wallpapers:', error));
+    }
+  }, [wallpapers]);
+
+  // Handle slideshow functionality
+  useEffect(() => {
+    if (settings.autoChange && wallpapers.length > 1 && settings.interval > 0) {
+      const interval = setInterval(() => {
+        const availableWallpapers = wallpapers.filter(w => w.path !== currentWallpaper);
+        if (availableWallpapers.length > 0) {
+          const randomIndex = Math.floor(Math.random() * availableWallpapers.length);
+          const nextWallpaper = availableWallpapers[randomIndex];
+          handleSetWallpaper(nextWallpaper);
+        }
+      }, settings.interval * 1000);
+      
+      setSlideshowInterval(interval);
+      
+      return () => {
+        clearInterval(interval);
+        setSlideshowInterval(null);
+      };
+    } else if (slideshowInterval) {
+      clearInterval(slideshowInterval);
+      setSlideshowInterval(null);
+    }
+  }, [settings.autoChange, settings.interval, wallpapers, currentWallpaper]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (slideshowInterval) {
+        clearInterval(slideshowInterval);
+      }
+    };
+  }, []);
 
   const handleAddFiles = async () => {
     try {
@@ -95,7 +152,7 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
           await handleStopVideo();
         }
         const result = await invoke<string>('set_static_wallpaper', { 
-          filePath: wallpaper.path 
+          filePath: wallpaper.path
         });
         console.log(result);
       }

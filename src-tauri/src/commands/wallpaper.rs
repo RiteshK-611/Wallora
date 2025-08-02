@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use tauri::{AppHandle, State, Wry};
 use crate::state::AppState;
 use crate::utils::file_utils::{get_mime_type, is_gif_type};
+use crate::commands::update_wallpaper_state;
 use tauri::Manager;
 
 #[cfg(target_os = "windows")]
@@ -184,6 +185,17 @@ pub async fn create_video_wallpaper(
             }
         }
     }
+
+    // Save wallpaper state
+    let file_extension = path.extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    let _ = update_wallpaper_state(
+        app.clone(),
+        file_path.clone(),
+        file_extension,
+    ).await;
 
     Ok(format!("Video wallpaper created successfully: {}", file_path))
 }
