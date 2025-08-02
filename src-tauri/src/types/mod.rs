@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct WallpaperInfo {
     pub path: String,
     pub name: String,
@@ -18,4 +18,22 @@ pub struct DateWidgetSettings {
     pub color: String,
     pub font: String,
     pub alignment: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct AppPersistentState {
+    pub last_wallpaper_path: Option<String>,
+    pub last_wallpaper_file_type: Option<String>,
+    pub date_widget_settings: Option<DateWidgetSettings>,
+    pub wallpaper_settings: Option<WallpaperSettings>,
+    pub wallpaper_list: Vec<WallpaperInfo>,
+    pub autostart_enabled: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct WallpaperSettings {
+    pub auto_change: bool,
+    pub interval: u32,
+    pub random_order: bool,
+    pub pause_on_fullscreen: bool,
 }

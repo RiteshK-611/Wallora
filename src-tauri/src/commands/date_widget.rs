@@ -1,6 +1,7 @@
 use tauri::{AppHandle, State, Wry, WebviewUrl};
 use crate::state::AppState;
 use crate::types::DateWidgetSettings;
+use crate::commands::update_date_widget_state;
 use tauri::Manager;
 use serde_json;
 
@@ -84,6 +85,9 @@ pub async fn create_date_widget(
         }
     }
 
+    // Save date widget state
+    let _ = update_date_widget_state(app.clone(), settings).await;
+
     Ok("Date widget created successfully".to_string())
 }
 
@@ -111,13 +115,26 @@ pub async fn show_date_widget(state: State<'_, AppState>, app: AppHandle<Wry>) -
 
 #[tauri::command]
 pub async fn close_date_widget(state: State<'_, AppState>, app: AppHandle<Wry>) -> Result<String, String> {
-    let mut date_widgets = state.date_widgets.lock().unwrap();
-    if let Some(window_label) = date_widgets.get("current") {
-        if let Some(window) = app.get_webview_window(window_label) {
+    let window_label = {
+        let date_widgets = state.date_widgets.lock().unwrap();
+        date_widgets.get("current").cloned()
+    };
+    
+    if let Some(label) = window_label {
+        if let Some(window) = app.get_webview_window(&label) {
             window.close().map_err(|e| format!("Failed to close date widget: {}", e))?;
         }
+        let mut date_widgets = state.date_widgets.lock().unwrap();
         date_widgets.remove("current");
     }
+    
+    // Update state to reflect widget is disabled
+    let current_state = crate::commands::load_app_state(app.clone()).await.unwrap_or_default();
+    if let Some(mut widget_settings) = current_state.date_widget_settings {
+        widget_settings.enabled = false;
+        let _ = update_date_widget_state(app, widget_settings).await;
+    }
+    
     Ok("Date widget closed".to_string())
 }
 
@@ -128,7 +145,17 @@ pub async fn update_date_widget(
     settings: DateWidgetSettings
 ) -> Result<String, String> {
     // Close existing widget and create new one with updated settings
-    let _ = close_date_widget(state.clone(), app.clone()).await;
+    let window_label = {
+        let date_widgets = state.date_widgets.lock().unwrap();
+        date_widgets.get("current").cloned()
+    };
+    
+    if let Some(label) = window_label {
+        if let Some(window) = app.get_webview_window(&label) {
+            let _ = window.close();
+        }
+    }
+    
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
     create_date_widget(app, state, settings).await
 }

@@ -23,6 +23,15 @@ export interface DateWidgetSettings {
   alignment: 'left' | 'center' | 'right';
 }
 
+export interface AppPersistentState {
+  last_wallpaper_path?: string;
+  last_wallpaper_file_type?: string;
+  date_widget_settings?: DateWidgetSettings;
+  wallpaper_settings?: WallpaperSettings;
+  wallpaper_list: WallpaperInfo[];
+  autostart_enabled: boolean;
+}
+
 export interface FontOption {
   name: string;
   value: string;
