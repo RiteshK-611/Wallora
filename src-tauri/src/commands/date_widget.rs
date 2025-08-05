@@ -48,8 +48,8 @@ pub async fn create_date_widget(
     .skip_taskbar(true)
     .always_on_top(false)
     .transparent(true)
-    .inner_size(400.0, 200.0)
-    .position(100.0, 100.0)
+    .inner_size(670.0, 250.0)
+    .position(settings.position_x, settings.position_y)
     .build()
     .map_err(|e| format!("Failed to create date widget window: {}", e))?;
 
@@ -87,6 +87,25 @@ pub async fn create_date_widget(
 
     // Save date widget state
     let _ = update_date_widget_state(app.clone(), settings).await;
+
+    // Set up position tracking
+    let app_clone = app.clone();
+    date_window.on_window_event(move |event| {
+        if let tauri::WindowEvent::Moved(position) = event {
+            let app_handle = app_clone.clone();
+            let pos = *position;
+            tauri::async_runtime::spawn(async move {
+                // Update position in persistent state
+                if let Ok(current_state) = crate::commands::load_app_state(app_handle.clone()).await {
+                    if let Some(mut widget_settings) = current_state.date_widget_settings {
+                        widget_settings.position_x = pos.x as f64;
+                        widget_settings.position_y = pos.y as f64;
+                        let _ = update_date_widget_state(app_handle, widget_settings).await;
+                    }
+                }
+            });
+        }
+    });
 
     Ok("Date widget created successfully".to_string())
 }
@@ -139,23 +158,35 @@ pub async fn close_date_widget(state: State<'_, AppState>, app: AppHandle<Wry>) 
 }
 
 #[tauri::command]
-pub async fn update_date_widget(
-    state: State<'_, AppState>, 
+pub async fn update_widget_property(
+    state: State<'_, AppState>,
     app: AppHandle<Wry>,
-    settings: DateWidgetSettings
+    key: String,
+    value: String
 ) -> Result<String, String> {
-    // Close existing widget and create new one with updated settings
     let window_label = {
         let date_widgets = state.date_widgets.lock().unwrap();
         date_widgets.get("current").cloned()
     };
-    
+
     if let Some(label) = window_label {
         if let Some(window) = app.get_webview_window(&label) {
-            let _ = window.close();
+            let value_js = match key.as_str() {
+                // booleans, numbers, etc. - don't quote
+                "scale" => value.clone(),
+                "bold_text" | "locked" | "show_time" => value.clone(), // if always "true"/"false" as bool
+                _ => format!("\"{}\"", value),
+            };
+            let js = format!(
+                "settings['{key}'] = {value_js}; if (window.applySettings) window.applySettings();",
+                key = key,
+                value_js = value_js
+            );
+            window.eval(&js).map_err(|e| format!("Failed: {}", e))?;
+        } else {
+            return Err("Date widget window not found".to_string());     
         }
     }
-    
-    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-    create_date_widget(app, state, settings).await
+
+    Ok("Updated".to_string())
 }

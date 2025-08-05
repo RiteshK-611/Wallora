@@ -188,16 +188,6 @@ body {
   margin-bottom: var(--spacing-xl);
 }
 
-.section-header {
-  margin-bottom: var(--spacing-xl);
-}
-
-.section-header h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
 /* Slideshow Controls */
 .slideshow-controls {
   margin-bottom: var(--spacing-xl);

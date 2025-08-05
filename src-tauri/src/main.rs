@@ -86,15 +86,15 @@ fn main() {
             hide_date_widget,
             show_date_widget,
             close_date_widget,
-            update_date_widget,
-            commands::app_state::save_app_state,
-            commands::app_state::load_app_state,
-            commands::app_state::set_autostart,
-            commands::app_state::get_autostart_status,
-            commands::app_state::update_wallpaper_state,
-            commands::app_state::update_date_widget_state,
-            commands::app_state::update_wallpaper_settings_state,
-            commands::app_state::save_wallpaper_list
+            update_widget_property,
+            save_app_state,
+            load_app_state,
+            set_autostart,
+            get_autostart_status,
+            update_wallpaper_state,
+            update_date_widget_state,
+            update_wallpaper_settings_state,
+            save_wallpaper_list
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
