@@ -219,10 +219,6 @@ const WallpaperManager: React.FC<WallpaperManagerProps> = ({ settings, onSetting
   return (
     <div className="wallpaper-container">
       <div className="wallpaper-section">
-        {/* <div className="section-header">
-          <h2>Wallpaper Manager</h2>
-        </div> */}
-
         <div className="slideshow-controls">
           <div className="control-row">
             <span className="control-label">Randomize slideshow</span>

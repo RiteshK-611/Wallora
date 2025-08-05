@@ -106,10 +106,8 @@ jobs:
         run: |
           msi=$(ls src-tauri/target/release/bundle/msi/*.msi | head -n 1 || true)
           exe=$(ls src-tauri/target/release/bundle/nsis/*.exe | head -n 1 || true)
-          msix=$(ls src-tauri/target/release/bundle/msix/*.msix | head -n 1 || true)
           echo "msi=$msi" >> $GITHUB_OUTPUT
           echo "exe=$exe" >> $GITHUB_OUTPUT
-          echo "msix=$msix" >> $GITHUB_OUTPUT
 
       - name: Upload MSI Artifact
         uses: actions/upload-artifact@v4
@@ -122,12 +120,6 @@ jobs:
         with:
           name: Wallora-EXE
           path: ${{ steps.artifacts.outputs.exe }}
-
-      - name: Upload MSIX Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Wallora-MSIX
-          path: ${{ steps.artifacts.outputs.msix }}
 
       # --- Create Draft GitHub Release with Artifacts ---
       - name: Create GitHub Release
@@ -143,4 +135,3 @@ jobs:
           files: |
             ${{ steps.artifacts.outputs.msi }}
             ${{ steps.artifacts.outputs.exe }}
-            ${{ steps.artifacts.outputs.msix }}

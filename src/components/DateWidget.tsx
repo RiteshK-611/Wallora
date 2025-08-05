@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { DateWidgetSettings, FontOption } from '../types/wallpaper';
+import { AppPersistentState, DateWidgetSettings, FontOption } from '../types/wallpaper';
 
 interface DateWidgetProps {
   settings: DateWidgetSettings;
@@ -22,11 +22,26 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
   const handleToggleWidget = async () => {
     try {
       setLoading(true);
+
+      const state : AppPersistentState = await invoke('load_app_state');
+      const latestWidgetSettings = state.date_widget_settings || {
+        position_x: 100,
+        position_y: 100,
+        scale: 1.0,
+        color: '#FFFFFF',
+        font: 'Arial',
+        alignment: 'center',
+        show_time: true,
+        bold_text: false,
+        locked: false,
+      };
+      
       if (settings.enabled) {
         await invoke('close_date_widget');
-        onSettingsChange({ ...settings, enabled: false });
+        const newSettings = { ...settings, enabled: false, position_x: latestWidgetSettings.position_x, position_y: latestWidgetSettings.position_y };
+        onSettingsChange(newSettings);
       } else {
-        const newSettings = { ...settings, enabled: true };
+        const newSettings = { ...settings, enabled: true, position_x: latestWidgetSettings.position_x, position_y: latestWidgetSettings.position_y };        
         await invoke('create_date_widget', { 
           settings: newSettings 
         });
@@ -42,11 +57,15 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
   const handleSettingChange = async (key: keyof DateWidgetSettings, value: any) => {
     const newSettings = { ...settings, [key]: value };
     onSettingsChange(newSettings);
+    await invoke("update_date_widget_state", { settings: newSettings });
     
     // If widget is enabled, update it with new settings
     if (settings.enabled) {
-      try {
-        await invoke('update_date_widget', { settings: newSettings });
+      try {        
+        await invoke("update_widget_property", {
+          key: key,
+          value: value.toString(),
+        });
       } catch (error) {
         console.error('Error updating date widget:', error);
       }
@@ -55,11 +74,7 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
 
   return (
     <div className="date-widget-container">
-      <div className="widget-section">
-        {/* <div className="section-header">
-          <h2>Date widget</h2>
-        </div> */}
-        
+      <div className="widget-section">        
         <div className="widget-controls">
           <div className="control-row">
             <span className="control-label">Enable this widget</span>
@@ -116,7 +131,7 @@ const DateWidget: React.FC<DateWidgetProps> = ({ settings, onSettingsChange }) =
               <input
                 type="range"
                 min="0.5"
-                max="2"
+                max="1.5"
                 step="0.1"
                 value={settings.scale}
                 onChange={(e) => handleSettingChange('scale', parseFloat(e.target.value))}
