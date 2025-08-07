@@ -13,7 +13,7 @@
     "active": true,
     "targets": ["nsis", "msi"],
     "icon": ["src/assets/icons/wallora.ico", "src/assets/icons/wallora.png"],
-    "category": "Multimedia",
+    "category": "Utility",
     "publisher": "Ritesh Kokam",
     "copyright": "Copyright © 2025 Ritesh Kokam. All rights reserved.",
     "shortDescription": "Wallora brings beautiful wallpapers and a clock overlay to your desktop.",

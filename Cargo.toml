@@ -12,7 +12,6 @@ license = "AGPL-3.0"
 repository = "https://github.com/riteshk-611/wallora"
 documentation = "https://github.com/riteshk-611/wallora#readme"
 keywords = ["wallpaper", "desktop", "customization", "video-wallpaper", "date-widget"]
-categories = ["multimedia", "gui"]
 rust-version = "1.88"
 build = "scripts/build.rs"
 
