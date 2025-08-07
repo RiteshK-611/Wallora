@@ -1,9 +1,20 @@
+[[bin]]
+name = "wallora"
+path = "src/tauri/main.rs"
+
 [package]
 name = "wallora"
-version = "1.0.0"
-description = "Premium wallpaper experience with dynamic backgrounds and widgets"
-authors = ["You"]
-edition = "2021"
+version = "1.2.0"
+description = "Wallora brings beautiful wallpapers and a clock overlay to your desktop."
+authors = ["riteshk-611"]
+edition = "2025"
+license = "AGPL-3.0"
+repository = "https://github.com/riteshk-611/wallora"
+documentation = "https://github.com/riteshk-611/wallora#readme"
+keywords = ["wallpaper", "desktop", "customization", "video-wallpaper", "date-widget"]
+categories = ["multimedia", "gui"]
+rust-version = "1.88"
+build = "scripts/build.rs"
 
 [build-dependencies]
 tauri-build = { version = "2.1", features = [] }
@@ -32,5 +43,5 @@ custom-protocol = ["tauri/custom-protocol"]
 panic = "abort"
 codegen-units = 1
 lto = true
-opt-level = "s"  # Optimize for size
-strip = true     # Remove debug symbols
+opt-level = "s"
+strip = true   

@@ -15,13 +15,13 @@ A modern, minimalistic wallpaper manager with video support and customizable dat
 
 ### Download
 
-Download the latest release from the [Releases](https://github.com/yourusername/wallora/releases) page.
+Download the latest release from the [Releases](https://github.com/riteshk-611/wallora/releases) page.
 
 ### Build from Source
 
 ```bashwallora
 # Cwallorarepository
-git clone https://github.com/yourusername/wallora.git
+git clone https://github.com/riteshk-611/wallora.git
 cd wallora
 
 # Install dependencies
@@ -53,8 +53,8 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## Supportwallora
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/yourusername/wallora/issues) on GitHub.
+If you encounter any issues or have questions, please [open an issue](https://github.com/riteshk-611/wallora/issues) on GitHub.

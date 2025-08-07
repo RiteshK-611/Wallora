@@ -1,25 +1,28 @@
 {
   "$schema": "https://schema.tauri.app/config/2.1.0",
   "productName": "Wallora",
-  "version": "1.0.0",
+  "version": "./package.json",
   "identifier": "com.wallora.app",
   "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist",
+    "beforeDevCommand": "vite dev",
+    "beforeBuildCommand": "vite build",
+    "frontendDist": "./dist",
     "devUrl": "http://localhost:1420"
   },
   "bundle": {
     "active": true,
     "targets": ["nsis", "msi"],
-    "icon": ["icons/wallora.ico", "icons/wallora.png"],
-    "category": "Utility",
-    "publisher": "Wallora",
-    "copyright": "Copyright © 2025",
+    "icon": ["src/assets/icons/wallora.ico", "src/assets/icons/wallora.png"],
+    "category": "Multimedia",
+    "publisher": "Ritesh Kokam",
+    "copyright": "Copyright © 2025 Ritesh Kokam. All rights reserved.",
     "shortDescription": "Wallora brings beautiful wallpapers and a clock overlay to your desktop.",
-    "longDescription": "Wallora is a beautiful desktop app for managing wallpapers and adding a stunning always-on clock overlay.",
+    "longDescription": "Wallora is a modern desktop application for managing wallpapers with support for images, videos, and GIFs. Features include auto-changing slideshows, live video wallpapers, customizable date widgets and system tray integration. Built with Tauri and React for optimal performance.",
     "homepage": "https://github.com/riteshk-611/wallora",
-    "licenseFile": "../LICENSE",
+    "licenseFile": "./LICENSE",
+    "resources": ["src/assets/icons/wallora.png"],
+    "externalBin": [],
+    "createUpdaterArtifacts": false,
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper", 
@@ -29,9 +32,9 @@
       "digestAlgorithm": "sha256",
       "timestampUrl": "",
       "nsis": {
-        "installerIcon": "icons/wallora.ico",
-        "headerImage": "icons/headerImg.bmp",
-        "sidebarImage": "icons/sidebarImg.bmp",
+        "installerIcon": "src/assets/icons/wallora.ico",
+        "headerImage": "src/assets/icons/headerImg.bmp",
+        "sidebarImage": "src/assets/icons/sidebarImg.bmp",
         "startMenuFolder": "Wallora",
         "installMode": "perMachine",
         "displayLanguageSelector": true,
@@ -50,8 +53,8 @@
       "wix": {
         "language": "en-US",
         "template": null,
-        "bannerPath": "icons/bannerImg.bmp",
-        "dialogImagePath": "icons/sidebarImg.bmp",
+        "bannerPath": "src/assets/icons/bannerImg.bmp",
+        "dialogImagePath": "src/assets/icons/sidebarImg.bmp",
         "fragmentPaths": [],
         "componentGroupRefs": [],
         "componentRefs": [],
@@ -59,10 +62,7 @@
         "featureRefs": [],
         "mergeRefs": []
       }
-    },
-    "resources": ["icons/wallora.png"],
-    "externalBin": [],
-    "createUpdaterArtifacts": false
+    }
   },
   "app": {
     "windows": [

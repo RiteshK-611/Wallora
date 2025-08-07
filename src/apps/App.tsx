@@ -111,13 +111,12 @@ function App() {
         <div className="header-left">
           <div style={{ display: "flex", alignItems: "center" }}>
             <img
-              src="../src-tauri/icons/wallora.png"
+              src="src/assets/icons/wallora.png"
               alt="Wallora Logo"
               style={{ width: "36px", height: "36px" }}
             />
             <h1>allora</h1>
           </div>
-          {/* <p className="app-subtitle">Premium Wallpaper Experience</p> */}
         </div>
         <div className="header-actions">
           <label className="autostart-control">
