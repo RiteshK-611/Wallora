@@ -1,8 +1,29 @@
 {
   "name": "wallora",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.2.0",
   "type": "module",
+  "description": "Wallora brings beautiful wallpapers and a clock overlay to your desktop.",
+  "author": {
+    "name": "riteshk-611",
+    "email": "riteshkokam@gmail.com",
+    "url": "https://github.com/riteshk-611"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/riteshk-611/wallora.git"
+  },
+  "keywords": [
+    "wallpaper",
+    "desktop",
+    "customization",
+    "video-wallpaper",
+    "date-widget",
+    "tauri",
+    "rust",
+    "react"
+  ],
+  "license": "AGPL-3.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

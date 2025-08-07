@@ -3,8 +3,6 @@ name: Build & Release Wallora
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   build-and-release:
@@ -31,70 +29,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # --- Semantic version/orientation tagging ---
-      - name: Generate new semantic tag (customized bump)
-        id: taggen
+      # --- Extract version from package.json ---
+      - name: Extract version from package.json
+        id: version
         shell: bash
         run: |
-          git fetch --tags
-          latest_tag=$(git tag --list 'v*' | sort -V | tail -n 1)
-          echo "Latest tag: $latest_tag"
-
-          if [[ "$latest_tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            major="${BASH_REMATCH[1]}"
-            minor="${BASH_REMATCH[2]}"
-            patch="${BASH_REMATCH[3]}"
-          else
-            major=1
-            minor=0
-            patch=0
-          fi
-
-          # Get commit messages from last tag
-          if [[ -z "$latest_tag" ]]; then
-            commits=$(git log --pretty=format:%s)
-          else
-            commits=$(git log "$latest_tag"..HEAD --pretty=format:%s)
-          fi
-
-          bump="patch"
-
-          if echo "$commits" | grep -q "BREAKING CHANGE"; then
-            bump="major"
-          elif echo "$commits" | grep -q "^feat"; then
-            bump="minor"
-          elif echo "$commits" | grep -q "^fix"; then
-            bump="patch"
-          fi
-
-          case $bump in
-            major)
-              major=$((major + 1))
-              minor=0
-              patch=0
-              ;;
-            minor)
-              minor=$((minor + 1))
-              patch=0
-              ;;
-            patch)
-              patch=$((patch + 1))
-              ;;
-          esac
-
-          new_tag="v$major.$minor.$patch"
-          echo "New tag: $new_tag"
-          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
-
-          # Skip tag if already present (safety for workflow restarts)
-          if git tag | grep -q "$new_tag"; then
-            echo "Tag $new_tag already exists, skipping tag creation."
-          else
-            git config user.name "github-actions"
-            git config user.email "github-actions@github.com"
-            git tag "$new_tag"
-            git push origin "$new_tag"
-          fi
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          echo "Version: $version"
+          echo "Tag: $tag"
 
       # --- Build the app (includes .exe, .msi, .msix) ---
       - name: Build Wallora (Tauri)
@@ -104,8 +49,8 @@ jobs:
         id: artifacts
         shell: bash
         run: |
-          msi=$(ls src-tauri/target/release/bundle/msi/*.msi | head -n 1 || true)
-          exe=$(ls src-tauri/target/release/bundle/nsis/*.exe | head -n 1 || true)
+          msi=$(ls target/release/bundle/msi/*.msi | head -n 1 || true)
+          exe=$(ls target/release/bundle/nsis/*.exe | head -n 1 || true)
           echo "msi=$msi" >> $GITHUB_OUTPUT
           echo "exe=$exe" >> $GITHUB_OUTPUT
 
@@ -123,15 +68,41 @@ jobs:
 
       # --- Create Draft GitHub Release with Artifacts ---
       - name: Create GitHub Release
-        if: steps.taggen.outputs.new_tag != ''
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.taggen.outputs.new_tag }}
-          name: Wallora ${{ steps.taggen.outputs.new_tag }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Wallora ${{ steps.version.outputs.tag }}
           body: |
-            Automated pre-release.
-            See [CHANGELOG](CHANGELOG.md) for details.
-          prerelease: true
+            ## 🎨 Wallora ${{ steps.version.outputs.version }}
+            
+            Wallora brings beautiful wallpapers and a clock overlay to your desktop.
+            
+            ### ✨ Features
+            - **Dynamic Wallpapers**: Support for images, videos, and GIFs
+            - **Live Wallpapers**: Video wallpapers that play behind your desktop
+            - **Date Widget**: Customizable desktop date widget with multiple fonts
+            - **Auto-Change**: Randomized slideshow functionality
+            - **System Tray**: Minimize to system tray for seamless operation
+            - **Cross-Platform**: Windows, macOS, and Linux support
+            
+            ### 📥 Download
+            - **Windows Installer (Recommended)**: `Wallora_${{ steps.version.outputs.version }}_x64-setup.exe`
+            - **Windows MSI**: `Wallora_${{ steps.version.outputs.version }}_x64_en-US.msi`
+            
+            ### 💻 System Requirements
+            - **Windows**: Windows 10 or later
+            - **macOS**: macOS 10.15 or later  
+            - **Linux**: Modern Linux distribution with X11 or Wayland
+            
+            ### 🚀 Installation
+            1. Download the appropriate installer for your system
+            2. Run the installer and follow the setup wizard
+            3. Launch Wallora from your applications menu
+            
+            ---
+            
+            **Full Changelog**: https://github.com/riteshk-611/wallora/commits/${{ steps.version.outputs.tag }}
+          prerelease: false
           files: |
             ${{ steps.artifacts.outputs.msi }}
             ${{ steps.artifacts.outputs.exe }}

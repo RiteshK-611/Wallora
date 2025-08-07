@@ -27,7 +27,7 @@ Pull requests are the best way to propose changes to the codebase. We actively w
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/wallora.git
+git clone https://github.com/riteshk-611/wallora.git
 cd wallora
 
 # Install dependencies
@@ -60,7 +60,7 @@ npm run tauri build
 
 ## Bug Reports
 
-We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/yourusername/wallora/issues/new).
+We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/riteshk-611/wallora/issues/new).
 
 **Great Bug Reports** tend to have:
 
