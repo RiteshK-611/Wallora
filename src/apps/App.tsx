@@ -2,8 +2,14 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import WallpaperManager from "./components/WallpaperManager";
 import DateWidget from "./components/DateWidget";
-import { WallpaperSettings, DateWidgetSettings, AppPersistentState } from "./types/wallpaper";
+import {
+  WallpaperSettings,
+  DateWidgetSettings,
+  AppPersistentState,
+} from "./types/wallpaper";
 import "./index.css";
+import { BsCalendar2Date } from "react-icons/bs";
+import { LuWallpaper } from "react-icons/lu";
 
 function App() {
   const [activeTab, setActiveTab] = useState<"wallpaper" | "datewidget">(
@@ -38,24 +44,23 @@ function App() {
   useEffect(() => {
     const loadAppState = async () => {
       try {
-        const state = await invoke<AppPersistentState>('load_app_state');
-        
+        const state = await invoke<AppPersistentState>("load_app_state");
+
         // Load wallpaper settings
         if (state.wallpaper_settings) {
           setWallpaperSettings(state.wallpaper_settings);
         }
-        
+
         // Load date widget settings
         if (state.date_widget_settings) {
           setDateWidgetSettings(state.date_widget_settings);
         }
-        
+
         // Load autostart status
-        const autostartStatus = await invoke<boolean>('get_autostart_status');
+        const autostartStatus = await invoke<boolean>("get_autostart_status");
         setAutostartEnabled(autostartStatus);
-        
       } catch (error) {
-        console.error('Error loading app state:', error);
+        console.error("Error loading app state:", error);
       } finally {
         setLoading(false);
       }
@@ -67,17 +72,20 @@ function App() {
   // Save wallpaper settings when they change
   useEffect(() => {
     if (!loading) {
-      invoke('update_wallpaper_settings_state', { settings: wallpaperSettings })
-        .catch(error => console.error('Error saving wallpaper settings:', error));
+      invoke("update_wallpaper_settings_state", {
+        settings: wallpaperSettings,
+      }).catch((error) =>
+        console.error("Error saving wallpaper settings:", error)
+      );
     }
   }, [wallpaperSettings, loading]);
 
   const handleAutostartToggle = async () => {
     try {
-      await invoke('set_autostart', { enable: !autostartEnabled });
+      await invoke("set_autostart", { enable: !autostartEnabled });
       setAutostartEnabled(!autostartEnabled);
     } catch (error) {
-      console.error('Error toggling autostart:', error);
+      console.error("Error toggling autostart:", error);
     }
   };
 
@@ -92,12 +100,14 @@ function App() {
   if (loading) {
     return (
       <div className="app">
-        <div className="loading-indicator" style={{ 
-          height: '100vh', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center' 
-        }}>
+        <div
+          className="loading-indicator"
+          style={{
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
           <div className="spinner"></div>
           <span>Loading Wallora...</span>
         </div>
@@ -128,8 +138,8 @@ function App() {
             <span>Auto-start</span>
           </label>
           <button onClick={hideWindow} className="btn btn-ghost">
-            <span className="btn-icon">−</span>
-            Minimize to Tray
+            {/* <span className="btn-icon">−</span> */}
+            Close
           </button>
         </div>
       </header>
@@ -138,13 +148,17 @@ function App() {
         <button
           className={`tab-button ${activeTab === "wallpaper" ? "active" : ""}`}
           onClick={() => setActiveTab("wallpaper")}>
-          <span className="tab-icon">📷</span>
+          {/* <span className="tab-icon">
+          </span> */}
+          <LuWallpaper className="tab-icon" />
           Wallpaper Manager
         </button>
         <button
           className={`tab-button ${activeTab === "datewidget" ? "active" : ""}`}
           onClick={() => setActiveTab("datewidget")}>
-          <span className="tab-icon">📆</span>
+          {/* <span className="tab-icon">
+          </span> */}
+          <BsCalendar2Date className="tab-icon" />
           Date Widget
         </button>
       </nav>
