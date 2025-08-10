@@ -80,6 +80,23 @@ pub async fn set_static_wallpaper(file_path: String) -> Result<String, String> {
     Ok(format!("Wallpaper set successfully: {}", file_path))
 }
 
+// Helper function to create proper asset protocol URL
+fn create_asset_url(file_path: &str) -> String {
+    // Convert file path to proper asset protocol URL
+    let normalized_path = file_path.replace('\\', '/');
+    format!("https://asset.localhost/{}", urlencoding::encode(&normalized_path))
+}
+
+#[tauri::command]
+pub async fn create_video_wallpaper_from_path(
+    app: AppHandle<Wry>,
+    file_path: String,
+    state: State<'_, AppState>,
+) -> Result<String, String> {
+    let converted_path = create_asset_url(&file_path);
+    create_video_wallpaper(app, file_path, converted_path, state).await
+}
+
 #[tauri::command]
 pub async fn create_video_wallpaper(
     app: AppHandle<Wry>,
@@ -92,6 +109,11 @@ pub async fn create_video_wallpaper(
     if !path.exists() {
         return Err(format!("Video file does not exist: {}", file_path));
     }
+
+    #[cfg(debug_assertions)]
+    println!("Creating video wallpaper - Original path: {}", file_path);
+    #[cfg(debug_assertions)]
+    println!("Creating video wallpaper - Converted path: {}", converted_path);
 
     // Create unique window label
     let window_label = format!("wallpaper-{}", 

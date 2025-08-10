@@ -70,6 +70,7 @@
                 
                 img.onerror = function() {
                     console.error('GIF/Image failed to load:', mediaPath);
+                    console.log('Image error details:', img.naturalWidth, img.naturalHeight);
                     // If image fails, try as video (some GIFs work better as video)
                     console.log('Retrying as video...');
                     img.remove();
@@ -102,6 +103,8 @@
                 
                 video.addEventListener('loadeddata', function() {
                     console.log('Video loaded successfully');
+                    console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+                    console.log('Video duration:', video.duration);
                     hasLoaded = true;
                     errorDisplay.style.display = 'none';
                     video.play().catch(e => {
@@ -123,6 +126,9 @@
                 
                 video.addEventListener('error', function(e) {
                     console.error('Video loading error:', e, video.error);
+                    console.error('Video error code:', video.error ? video.error.code : 'Unknown');
+                    console.error('Video error message:', video.error ? video.error.message : 'Unknown');
+                    console.error('Media path being loaded:', mediaPath);
                     if (!hasLoaded) {
                         video.style.display = 'none';
                         errorDisplay.style.display = 'block';
@@ -140,11 +146,13 @@
                 // Timeout fallback
                 setTimeout(() => {
                     if (!hasLoaded && video.readyState < 2) {
-                        console.error('Video loading timeout');
+                        console.error('Video loading timeout. ReadyState:', video.readyState);
+                        console.error('Network state:', video.networkState);
+                        console.error('Media path:', mediaPath);
                         errorDisplay.style.display = 'block';
-                        errorDisplay.textContent = 'Video loading timeout - file may not exist or be corrupted';
+                        errorDisplay.textContent = `Video loading timeout - ReadyState: ${video.readyState}, NetworkState: ${video.networkState}`;
                     }
-                }, 10000); // 10 second timeout
+                }, 15000); // 15 second timeout
                 
                 container.appendChild(video);
             }

@@ -36,12 +36,10 @@ fn main() {
                         if is_video {
                             // Check if file still exists before trying to restore
                             if std::path::Path::new(wallpaper_path).exists() {
-                                let converted_path = format!("asset://localhost/{}", urlencoding::encode(wallpaper_path));
                                 if let Some(app_state) = app_handle.try_state::<AppState>() {
-                                    let _ = commands::create_video_wallpaper(
+                                    let _ = commands::create_video_wallpaper_from_path(
                                         app_handle.clone(),
                                         wallpaper_path.clone(),
-                                        converted_path,
                                         app_state,
                                     ).await;
                                 }
@@ -83,6 +81,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             commands::set_static_wallpaper,
             create_video_wallpaper,
+            create_video_wallpaper_from_path,
             stop_video_wallpaper,
             get_wallpaper_files,
             get_files_info,
