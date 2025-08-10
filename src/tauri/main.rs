@@ -34,17 +34,23 @@ fn main() {
                         let is_video = ["mp4", "webm", "avi", "mov", "mkv", "gif"].contains(&file_type.to_lowercase().as_str());
                         
                         if is_video {
-                            let converted_path = format!("asset://localhost/{}", urlencoding::encode(wallpaper_path));
-                            if let Some(app_state) = app_handle.try_state::<AppState>() {
-                                let _ = commands::create_video_wallpaper(
-                                    app_handle.clone(),
-                                    wallpaper_path.clone(),
-                                    converted_path,
-                                    app_state,
-                                ).await;
+                            // Check if file still exists before trying to restore
+                            if std::path::Path::new(wallpaper_path).exists() {
+                                let converted_path = format!("asset://localhost/{}", urlencoding::encode(wallpaper_path));
+                                if let Some(app_state) = app_handle.try_state::<AppState>() {
+                                    let _ = commands::create_video_wallpaper(
+                                        app_handle.clone(),
+                                        wallpaper_path.clone(),
+                                        converted_path,
+                                        app_state,
+                                    ).await;
+                                }
                             }
                         } else {
-                            let _ = commands::set_static_wallpaper(wallpaper_path.clone()).await;
+                            // Check if file still exists before trying to restore
+                            if std::path::Path::new(wallpaper_path).exists() {
+                                let _ = commands::set_static_wallpaper(wallpaper_path.clone()).await;
+                            }
                         }
                     }
                     

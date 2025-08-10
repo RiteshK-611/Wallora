@@ -90,7 +90,7 @@ pub async fn create_video_wallpaper(
     let path = PathBuf::from(&file_path);
     
     if !path.exists() {
-        return Err("Video file does not exist".to_string());
+        return Err(format!("Video file does not exist: {}", file_path));
     }
 
     // Create unique window label
@@ -117,8 +117,10 @@ pub async fn create_video_wallpaper(
         .unwrap_or("")
         .to_lowercase();
     
+    // Determine the best MIME type for the file
     let mime_type = if is_gif_type(&file_extension) {
-        "image/gif".to_string()
+        // For GIFs, try as image first, fallback to video handled in HTML
+        "gif".to_string()
     } else {
         get_mime_type(&file_path)
     };
@@ -129,6 +131,9 @@ pub async fn create_video_wallpaper(
         urlencoding::encode(&converted_path),
         urlencoding::encode(&mime_type)
     );
+    
+    #[cfg(debug_assertions)]
+    println!("Creating wallpaper window with URL: {}", wallpaper_url);
 
     // Create wallpaper window
     let video_window = tauri::WebviewWindowBuilder::new(

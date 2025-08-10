@@ -19,16 +19,13 @@ pub fn get_mime_type(file_path: &str) -> String {
         .unwrap_or("")
         .to_lowercase();
     
-    if file_extension == "gif" {
-        "image/gif".to_string()
-    } else {
-        match file_extension.as_str() {
-            "mp4" => "video/mp4",
-            "webm" => "video/webm",
-            "avi" => "video/avi",
-            "mov" => "video/quicktime",
-            "mkv" => "video/x-matroska",
-            _ => "video/mp4",
-        }.to_string()
-    }
+    match file_extension.as_str() {
+        "gif" => "gif", // Special handling in wallpaper.html
+        "mp4" => "video/mp4",
+        "webm" => "video/webm",
+        "avi" => "video/avi",
+        "mov" => "video/quicktime",
+        "mkv" => "video/x-matroska",
+        _ => "video/mp4",
+    }.to_string()
 }

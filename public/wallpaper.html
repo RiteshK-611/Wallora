@@ -55,7 +55,8 @@
             const container = document.getElementById('media-container');
             const errorDisplay = document.getElementById('error-display');
             
-            if (mediaType === 'gif' || mediaType.startsWith('image/')) {
+            // Handle GIF files (they can be treated as images or videos depending on browser)
+            if (mediaType === 'gif' || mediaType === 'image/gif' || mediaType.startsWith('image/')) {
                 // Handle GIF files
                 const img = document.createElement('img');
                 img.id = 'media-element';
@@ -69,14 +70,19 @@
                 
                 img.onerror = function() {
                     console.error('GIF/Image failed to load:', mediaPath);
-                    img.style.display = 'none';
-                    errorDisplay.style.display = 'block';
-                    errorDisplay.textContent = 'Failed to load image/GIF';
+                    // If image fails, try as video (some GIFs work better as video)
+                    console.log('Retrying as video...');
+                    img.remove();
+                    createVideoElement();
                 };
                 
                 container.appendChild(img);
                 
             } else {
+                createVideoElement();
+            }
+            
+            function createVideoElement() {
                 // Handle video files
                 const video = document.createElement('video');
                 video.id = 'media-element';
@@ -86,33 +92,59 @@
                 video.playsInline = true;
                 video.preload = 'auto';
                 
+                // Try multiple source formats for better compatibility
                 const source = document.createElement('source');
                 source.src = mediaPath;
                 source.type = mediaType;
                 video.appendChild(source);
                 
+                let hasLoaded = false;
+                
                 video.addEventListener('loadeddata', function() {
                     console.log('Video loaded successfully');
+                    hasLoaded = true;
                     errorDisplay.style.display = 'none';
                     video.play().catch(e => {
                         console.error('Video autoplay failed:', e);
-                        errorDisplay.style.display = 'block';
-                        errorDisplay.textContent = 'Video autoplay failed';
+                        if (!hasLoaded) {
+                            errorDisplay.style.display = 'block';
+                            errorDisplay.textContent = 'Video autoplay failed';
+                        }
                     });
                 });
                 
+                video.addEventListener('loadedmetadata', function() {
+                    console.log('Video metadata loaded');
+                    if (!hasLoaded) {
+                        hasLoaded = true;
+                        errorDisplay.style.display = 'none';
+                    }
+                });
+                
                 video.addEventListener('error', function(e) {
-                    console.error('Video loading error:', e);
-                    video.style.display = 'none';
-                    errorDisplay.style.display = 'block';
-                    errorDisplay.textContent = 'Failed to load video';
+                    console.error('Video loading error:', e, video.error);
+                    if (!hasLoaded) {
+                        video.style.display = 'none';
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = `Failed to load video: ${video.error ? video.error.message : 'Unknown error'}`;
+                    }
                 });
                 
                 video.addEventListener('canplay', function() {
+                    console.log('Video can play');
                     if (video.paused) {
                         video.play().catch(e => console.error('Manual play failed:', e));
                     }
                 });
+                
+                // Timeout fallback
+                setTimeout(() => {
+                    if (!hasLoaded && video.readyState < 2) {
+                        console.error('Video loading timeout');
+                        errorDisplay.style.display = 'block';
+                        errorDisplay.textContent = 'Video loading timeout - file may not exist or be corrupted';
+                    }
+                }, 10000); // 10 second timeout
                 
                 container.appendChild(video);
             }
