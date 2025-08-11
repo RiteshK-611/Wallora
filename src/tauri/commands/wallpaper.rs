@@ -82,8 +82,35 @@ pub async fn set_static_wallpaper(file_path: String) -> Result<String, String> {
 
 // Helper function to create proper asset protocol URL
 fn create_asset_url(file_path: &str) -> String {
+    create_asset_url_internal(file_path, false)
+}
+
+fn create_asset_url_with_validation(file_path: &str) -> Result<String, String> {
+    // Additional validation for startup
+    let path = std::path::Path::new(file_path);
+    if !path.exists() {
+        return Err(format!("File does not exist for asset URL: {}", file_path));
+    }
+    
+    // Check if file is readable
+    match std::fs::metadata(file_path) {
+        Ok(metadata) => {
+            if metadata.len() == 0 {
+                return Err(format!("File is empty: {}", file_path));
+            }
+        }
+        Err(e) => {
+            return Err(format!("Cannot read file metadata: {}", e));
+        }
+    }
+    
+    Ok(create_asset_url_internal(file_path, true))
+}
+
+fn create_asset_url_internal(file_path: &str, is_startup: bool) -> String {
     #[cfg(debug_assertions)]
-    println!("Creating asset URL for: {}", file_path);
+    println!("Creating asset URL{} for: {}", 
+        if is_startup { " (startup)" } else { "" }, file_path);
     
     // Normalize path separators for cross-platform compatibility
     let normalized_path = if cfg!(windows) {
@@ -97,9 +124,50 @@ fn create_asset_url(file_path: &str) -> String {
     let asset_url = format!("https://asset.localhost/{}", urlencoding::encode(&normalized_path));
     
     #[cfg(debug_assertions)]
-    println!("Generated asset URL: {}", asset_url);
+    println!("Generated asset URL{}: {}", 
+        if is_startup { " (startup)" } else { "" }, asset_url);
     
     asset_url
+}
+
+#[tauri::command]
+pub async fn create_video_wallpaper_startup(
+    app: AppHandle<Wry>,
+    file_path: String,
+    state: State<'_, AppState>,
+    attempt: u32,
+) -> Result<String, String> {
+    #[cfg(debug_assertions)]
+    println!("create_video_wallpaper_startup called with: {} (attempt {})", file_path, attempt);
+    
+    // Verify file exists and is accessible
+    let path = std::path::Path::new(&file_path);
+    if !path.exists() {
+        return Err(format!("File does not exist: {}", file_path));
+    }
+    
+    // Try to read file to ensure it's accessible
+    match std::fs::File::open(&file_path) {
+        Ok(_) => {
+            #[cfg(debug_assertions)]
+            println!("File is accessible: {}", file_path);
+        }
+        Err(e) => {
+            return Err(format!("File is not accessible: {}", e));
+        }
+    }
+    
+    // For startup restoration, wait longer for asset protocol
+    let wait_time = 1000 + (attempt * 1000); // 2s, 3s, 4s
+    tokio::time::sleep(std::time::Duration::from_millis(wait_time)).await;
+    
+    // Create asset URL with better error handling
+    let converted_path = create_asset_url_with_validation(&file_path)?;
+    
+    #[cfg(debug_assertions)]
+    println!("Startup restoration - Converted path: {}", converted_path);
+    
+    create_video_wallpaper_internal(app, file_path, converted_path, state, true).await
 }
 
 #[tauri::command]
@@ -125,7 +193,7 @@ pub async fn create_video_wallpaper_from_path(
     #[cfg(debug_assertions)]
     println!("Converted path: {}", converted_path);
     
-    create_video_wallpaper(app, file_path, converted_path, state).await
+    create_video_wallpaper_internal(app, file_path, converted_path, state, false).await
 }
 
 #[tauri::command]
@@ -135,6 +203,17 @@ pub async fn create_video_wallpaper(
     converted_path: String,
     state: State<'_, AppState>,
 ) -> Result<String, String> {
+    create_video_wallpaper_internal(app, file_path, converted_path, state, false).await
+}
+
+// Internal function that handles both regular and startup video wallpaper creation
+async fn create_video_wallpaper_internal(
+    app: AppHandle<Wry>,
+    file_path: String,
+    converted_path: String,
+    state: State<'_, AppState>,
+    is_startup: bool,
+) -> Result<String, String> {
     let path = PathBuf::from(&file_path);
     
     if !path.exists() {
@@ -142,9 +221,11 @@ pub async fn create_video_wallpaper(
     }
 
     #[cfg(debug_assertions)]
-    println!("Creating video wallpaper - Original path: {}", file_path);
+    println!("Creating video wallpaper{} - Original path: {}", 
+        if is_startup { " (startup)" } else { "" }, file_path);
     #[cfg(debug_assertions)]
-    println!("Creating video wallpaper - Converted path: {}", converted_path);
+    println!("Creating video wallpaper{} - Converted path: {}", 
+        if is_startup { " (startup)" } else { "" }, converted_path);
 
     // Create unique window label
     let window_label = format!("wallpaper-{}", 
@@ -180,13 +261,15 @@ pub async fn create_video_wallpaper(
 
     // Create wallpaper window URL with parameters
     let wallpaper_url = format!(
-        "wallpaper.html?path={}&type={}",
+        "wallpaper.html?path={}&type={}&startup={}",
         urlencoding::encode(&converted_path),
-        urlencoding::encode(&mime_type)
+        urlencoding::encode(&mime_type),
+        is_startup
     );
     
     #[cfg(debug_assertions)]
-    println!("Creating wallpaper window with URL: {}", wallpaper_url);
+    println!("Creating wallpaper window{} with URL: {}", 
+        if is_startup { " (startup)" } else { "" }, wallpaper_url);
 
     // Create wallpaper window
     let video_window = tauri::WebviewWindowBuilder::new(
@@ -215,14 +298,11 @@ pub async fn create_video_wallpaper(
     video_window.show()
         .map_err(|e| format!("Failed to show window: {}", e))?;
 
-    // Wait for window to be ready
-    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
-
-    // Additional wait for startup restoration to ensure asset protocol is ready
-    let args: Vec<String> = std::env::args().collect();
-    if args.contains(&"--minimized".to_string()) {
-        // If started minimized (likely from autostart), wait longer
+    // Wait for window to be ready - longer for startup
+    if is_startup {
         tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+    } else {
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
     }
 
     // Windows-specific: Use blocking task to avoid Send issues

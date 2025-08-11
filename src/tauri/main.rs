@@ -29,12 +29,11 @@ fn main() {
             let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 // Wait a bit for the app to fully initialize
-                tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
                 
                 if let Ok(state) = commands::load_app_state(app_handle.clone()).await {
                     // Restore wallpaper if exists
                     if let (Some(wallpaper_path), Some(file_type)) = (&state.last_wallpaper_path, &state.last_wallpaper_file_type) {
-                        let is_video = ["mp4", "webm", "avi", "mov", "mkv", "gif"].contains(&file_type.to_lowercase().as_str());
                         
                         // Verify file exists before attempting to restore
                         if !std::path::Path::new(wallpaper_path).exists() {
@@ -43,23 +42,42 @@ fn main() {
                             return;
                         }
                         
+                        let is_video = ["mp4", "webm", "avi", "mov", "mkv", "gif"].contains(&file_type.to_lowercase().as_str());
+                        
                         if is_video {
                             #[cfg(debug_assertions)]
                             println!("Restoring video wallpaper: {}", wallpaper_path);
                             
+                            // Wait additional time for asset protocol to be ready
+                            tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                            
                             if let Some(app_state) = app_handle.try_state::<AppState>() {
-                                match commands::create_video_wallpaper_from_path(
-                                    app_handle.clone(),
-                                    wallpaper_path.clone(),
-                                    app_state,
-                                ).await {
-                                    Ok(_) => {
-                                        #[cfg(debug_assertions)]
-                                        println!("Successfully restored video wallpaper");
-                                    }
-                                    Err(e) => {
-                                        #[cfg(debug_assertions)]
-                                        eprintln!("Failed to restore video wallpaper: {}", e);
+                                // Try multiple times with increasing delays
+                                let mut attempts = 0;
+                                let max_attempts = 3;
+                                
+                                while attempts < max_attempts {
+                                    attempts += 1;
+                                    
+                                    match commands::create_video_wallpaper_startup(
+                                        app_handle.clone(),
+                                        wallpaper_path.clone(),
+                                        app_state.clone(),
+                                        attempts,
+                                    ).await {
+                                        Ok(_) => {
+                                            #[cfg(debug_assertions)]
+                                            println!("Successfully restored video wallpaper on attempt {}", attempts);
+                                            break;
+                                        }
+                                        Err(e) => {
+                                            #[cfg(debug_assertions)]
+                                            eprintln!("Failed to restore video wallpaper on attempt {}: {}", attempts, e);
+                                            
+                                            if attempts < max_attempts {
+                                                tokio::time::sleep(std::time::Duration::from_millis(2000 * attempts as u64)).await;
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -68,13 +86,14 @@ fn main() {
                             println!("Restoring static wallpaper: {}", wallpaper_path);
                             
                             match commands::set_static_wallpaper(wallpaper_path.clone()).await {
-                                Ok(_) => {
-                                    #[cfg(debug_assertions)]
-                                    println!("Successfully restored static wallpaper");
-                                }
-                                Err(e) => {
-                                    #[cfg(debug_assertions)]
-                                    eprintln!("Failed to restore static wallpaper: {}", e);
+                                    Ok(_) => {
+                                        #[cfg(debug_assertions)]
+                                        println!("Successfully restored video wallpaper");
+                                    }
+                                    Err(e) => {
+                                        #[cfg(debug_assertions)]
+                                        eprintln!("Failed to restore video wallpaper: {}", e);
+                                    }
                                 }
                             }
                         }
@@ -113,6 +132,7 @@ fn main() {
             commands::set_static_wallpaper,
             create_video_wallpaper,
             create_video_wallpaper_from_path,
+            create_video_wallpaper_startup,
             stop_video_wallpaper,
             get_wallpaper_files,
             get_files_info,

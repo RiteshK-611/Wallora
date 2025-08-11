@@ -48,26 +48,28 @@
         const urlParams = new URLSearchParams(window.location.search);
         const mediaPath = urlParams.get('path');
         const mediaType = urlParams.get('type');
+        const isStartup = urlParams.get('startup') === 'true';
         
-        console.log('Loading wallpaper:', mediaPath, mediaType);
+        console.log('Loading wallpaper:', mediaPath, mediaType, 'startup:', isStartup);
         console.log('Current URL:', window.location.href);
         
         if (mediaPath && mediaType) {
             const container = document.getElementById('media-container');
             const errorDisplay = document.getElementById('error-display');
             
-            // Add more detailed error handling
+            // Adjust retry logic based on startup
             let loadAttempts = 0;
-            const maxAttempts = 3;
+            const maxAttempts = isStartup ? 5 : 3;
+            const baseDelay = isStartup ? 2000 : 1000;
             
             function attemptLoad() {
                 loadAttempts++;
-                console.log(`Load attempt ${loadAttempts} for:`, mediaPath);
+                console.log(`Load attempt ${loadAttempts}/${maxAttempts} for:`, mediaPath, isStartup ? '(startup)' : '');
                 
                 if (loadAttempts > maxAttempts) {
-                    console.error('Max load attempts reached');
+                    console.error('Max load attempts reached for:', mediaPath);
                     errorDisplay.style.display = 'block';
-                    errorDisplay.textContent = 'Failed to load after multiple attempts';
+                    errorDisplay.textContent = `Failed to load after ${maxAttempts} attempts. File may be corrupted or inaccessible.`;
                     return;
                 }
                 
@@ -94,12 +96,12 @@
                     console.log('Image error details:', img.naturalWidth, img.naturalHeight);
                     
                     if (loadAttempts < maxAttempts) {
-                        console.log('Retrying image load...');
+                        console.log(`Retrying image load in ${baseDelay * loadAttempts}ms...`);
                         img.remove();
-                        setTimeout(attemptLoad, 1000);
+                        setTimeout(attemptLoad, baseDelay * loadAttempts);
                     } else {
                         // If image fails, try as video (some GIFs work better as video)
-                        console.log('Retrying as video...');
+                        console.log('All image attempts failed, trying as video...');
                         img.remove();
                         createVideoElement();
                     }
@@ -161,17 +163,18 @@
                     console.error('Video error code:', video.error ? video.error.code : 'Unknown');
                     console.error('Video error message:', video.error ? video.error.message : 'Unknown');
                     console.error('Media path being loaded:', mediaPath);
+                    console.error('Is startup restoration:', isStartup);
                     if (loadTimeout) clearTimeout(loadTimeout);
                     
                     if (!hasLoaded) {
                         if (loadAttempts < maxAttempts) {
-                            console.log('Retrying video load...');
+                            console.log(`Retrying video load in ${baseDelay * loadAttempts}ms...`);
                             video.remove();
-                            setTimeout(attemptLoad, 2000);
+                            setTimeout(attemptLoad, baseDelay * loadAttempts);
                         } else {
                             video.style.display = 'none';
                             errorDisplay.style.display = 'block';
-                            errorDisplay.textContent = `Failed to load video: ${video.error ? video.error.message : 'Unknown error'}`;
+                            errorDisplay.textContent = `Failed to load video after ${maxAttempts} attempts: ${video.error ? video.error.message : 'Unknown error'}`;
                         }
                     }
                 });
@@ -184,22 +187,24 @@
                 });
                 
                 // Timeout fallback with retry logic
+                const timeoutDuration = isStartup ? 15000 : 10000; // Longer timeout for startup
                 loadTimeout = setTimeout(() => {
                     if (!hasLoaded && video.readyState < 2) {
-                        console.error('Video loading timeout. ReadyState:', video.readyState);
+                        console.error(`Video loading timeout after ${timeoutDuration}ms. ReadyState:`, video.readyState);
                         console.error('Network state:', video.networkState);
                         console.error('Media path:', mediaPath);
+                        console.error('Is startup:', isStartup);
                         
                         if (loadAttempts < maxAttempts) {
-                            console.log('Timeout reached, retrying...');
+                            console.log(`Timeout reached, retrying in ${baseDelay * loadAttempts}ms...`);
                             video.remove();
-                            setTimeout(attemptLoad, 1000);
+                            setTimeout(attemptLoad, baseDelay * loadAttempts);
                         } else {
                             errorDisplay.style.display = 'block';
-                            errorDisplay.textContent = `Video loading timeout - file may not exist or be corrupted`;
+                            errorDisplay.textContent = `Video loading timeout after ${maxAttempts} attempts - file may not exist or be corrupted`;
                         }
                     }
-                }, 10000); // 10 second timeout per attempt
+                }, timeoutDuration);
                 
                 container.appendChild(video);
             }
