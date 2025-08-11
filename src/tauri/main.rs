@@ -28,26 +28,54 @@ fn main() {
             // Load persistent state and restore previous session
             let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
+                // Wait a bit for the app to fully initialize
+                tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                
                 if let Ok(state) = commands::load_app_state(app_handle.clone()).await {
                     // Restore wallpaper if exists
                     if let (Some(wallpaper_path), Some(file_type)) = (&state.last_wallpaper_path, &state.last_wallpaper_file_type) {
                         let is_video = ["mp4", "webm", "avi", "mov", "mkv", "gif"].contains(&file_type.to_lowercase().as_str());
                         
+                        // Verify file exists before attempting to restore
+                        if !std::path::Path::new(wallpaper_path).exists() {
+                            #[cfg(debug_assertions)]
+                            eprintln!("Previous wallpaper file no longer exists: {}", wallpaper_path);
+                            return;
+                        }
+                        
                         if is_video {
-                            // Check if file still exists before trying to restore
-                            if std::path::Path::new(wallpaper_path).exists() {
-                                if let Some(app_state) = app_handle.try_state::<AppState>() {
-                                    let _ = commands::create_video_wallpaper_from_path(
-                                        app_handle.clone(),
-                                        wallpaper_path.clone(),
-                                        app_state,
-                                    ).await;
+                            #[cfg(debug_assertions)]
+                            println!("Restoring video wallpaper: {}", wallpaper_path);
+                            
+                            if let Some(app_state) = app_handle.try_state::<AppState>() {
+                                match commands::create_video_wallpaper_from_path(
+                                    app_handle.clone(),
+                                    wallpaper_path.clone(),
+                                    app_state,
+                                ).await {
+                                    Ok(_) => {
+                                        #[cfg(debug_assertions)]
+                                        println!("Successfully restored video wallpaper");
+                                    }
+                                    Err(e) => {
+                                        #[cfg(debug_assertions)]
+                                        eprintln!("Failed to restore video wallpaper: {}", e);
+                                    }
                                 }
                             }
                         } else {
-                            // Check if file still exists before trying to restore
-                            if std::path::Path::new(wallpaper_path).exists() {
-                                let _ = commands::set_static_wallpaper(wallpaper_path.clone()).await;
+                            #[cfg(debug_assertions)]
+                            println!("Restoring static wallpaper: {}", wallpaper_path);
+                            
+                            match commands::set_static_wallpaper(wallpaper_path.clone()).await {
+                                Ok(_) => {
+                                    #[cfg(debug_assertions)]
+                                    println!("Successfully restored static wallpaper");
+                                }
+                                Err(e) => {
+                                    #[cfg(debug_assertions)]
+                                    eprintln!("Failed to restore static wallpaper: {}", e);
+                                }
                             }
                         }
                     }
@@ -55,6 +83,9 @@ fn main() {
                     // Restore date widget if enabled
                     if let Some(widget_settings) = &state.date_widget_settings {
                         if widget_settings.enabled {
+                            #[cfg(debug_assertions)]
+                            println!("Restoring date widget");
+                            
                             if let Some(app_state) = app_handle.try_state::<AppState>() {
                                 let _ = commands::create_date_widget(
                                     app_handle.clone(),

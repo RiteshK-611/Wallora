@@ -82,9 +82,24 @@ pub async fn set_static_wallpaper(file_path: String) -> Result<String, String> {
 
 // Helper function to create proper asset protocol URL
 fn create_asset_url(file_path: &str) -> String {
-    // Convert file path to proper asset protocol URL
-    let normalized_path = file_path.replace('\\', '/');
-    format!("https://asset.localhost/{}", urlencoding::encode(&normalized_path))
+    #[cfg(debug_assertions)]
+    println!("Creating asset URL for: {}", file_path);
+    
+    // Normalize path separators for cross-platform compatibility
+    let normalized_path = if cfg!(windows) {
+        // On Windows, convert backslashes to forward slashes
+        file_path.replace('\\', "/")
+    } else {
+        file_path.to_string()
+    };
+    
+    // Create asset protocol URL
+    let asset_url = format!("https://asset.localhost/{}", urlencoding::encode(&normalized_path));
+    
+    #[cfg(debug_assertions)]
+    println!("Generated asset URL: {}", asset_url);
+    
+    asset_url
 }
 
 #[tauri::command]
@@ -93,7 +108,23 @@ pub async fn create_video_wallpaper_from_path(
     file_path: String,
     state: State<'_, AppState>,
 ) -> Result<String, String> {
+    #[cfg(debug_assertions)]
+    println!("create_video_wallpaper_from_path called with: {}", file_path);
+    
+    // Verify file exists
+    let path = std::path::Path::new(&file_path);
+    if !path.exists() {
+        return Err(format!("File does not exist: {}", file_path));
+    }
+    
+    // Wait a bit to ensure asset protocol is ready
+    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+    
     let converted_path = create_asset_url(&file_path);
+    
+    #[cfg(debug_assertions)]
+    println!("Converted path: {}", converted_path);
+    
     create_video_wallpaper(app, file_path, converted_path, state).await
 }
 
@@ -186,6 +217,13 @@ pub async fn create_video_wallpaper(
 
     // Wait for window to be ready
     tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+    // Additional wait for startup restoration to ensure asset protocol is ready
+    let args: Vec<String> = std::env::args().collect();
+    if args.contains(&"--minimized".to_string()) {
+        // If started minimized (likely from autostart), wait longer
+        tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+    }
 
     // Windows-specific: Use blocking task to avoid Send issues
     #[cfg(target_os = "windows")]

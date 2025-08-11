@@ -50,11 +50,31 @@
         const mediaType = urlParams.get('type');
         
         console.log('Loading wallpaper:', mediaPath, mediaType);
+        console.log('Current URL:', window.location.href);
         
         if (mediaPath && mediaType) {
             const container = document.getElementById('media-container');
             const errorDisplay = document.getElementById('error-display');
             
+            // Add more detailed error handling
+            let loadAttempts = 0;
+            const maxAttempts = 3;
+            
+            function attemptLoad() {
+                loadAttempts++;
+                console.log(`Load attempt ${loadAttempts} for:`, mediaPath);
+                
+                if (loadAttempts > maxAttempts) {
+                    console.error('Max load attempts reached');
+                    errorDisplay.style.display = 'block';
+                    errorDisplay.textContent = 'Failed to load after multiple attempts';
+                    return;
+                }
+                
+                loadMedia();
+            }
+            
+            function loadMedia() {
             // Handle GIF files (they can be treated as images or videos depending on browser)
             if (mediaType === 'gif' || mediaType === 'image/gif' || mediaType.startsWith('image/')) {
                 // Handle GIF files
@@ -65,22 +85,31 @@
                 
                 img.onload = function() {
                     console.log('GIF/Image loaded successfully');
+                    console.log('Image dimensions:', img.naturalWidth, 'x', img.naturalHeight);
                     errorDisplay.style.display = 'none';
                 };
                 
                 img.onerror = function() {
                     console.error('GIF/Image failed to load:', mediaPath);
                     console.log('Image error details:', img.naturalWidth, img.naturalHeight);
-                    // If image fails, try as video (some GIFs work better as video)
-                    console.log('Retrying as video...');
-                    img.remove();
-                    createVideoElement();
+                    
+                    if (loadAttempts < maxAttempts) {
+                        console.log('Retrying image load...');
+                        img.remove();
+                        setTimeout(attemptLoad, 1000);
+                    } else {
+                        // If image fails, try as video (some GIFs work better as video)
+                        console.log('Retrying as video...');
+                        img.remove();
+                        createVideoElement();
+                    }
                 };
                 
                 container.appendChild(img);
                 
             } else {
                 createVideoElement();
+            }
             }
             
             function createVideoElement() {
@@ -100,12 +129,14 @@
                 video.appendChild(source);
                 
                 let hasLoaded = false;
+                let loadTimeout;
                 
                 video.addEventListener('loadeddata', function() {
                     console.log('Video loaded successfully');
                     console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
                     console.log('Video duration:', video.duration);
                     hasLoaded = true;
+                    if (loadTimeout) clearTimeout(loadTimeout);
                     errorDisplay.style.display = 'none';
                     video.play().catch(e => {
                         console.error('Video autoplay failed:', e);
@@ -120,6 +151,7 @@
                     console.log('Video metadata loaded');
                     if (!hasLoaded) {
                         hasLoaded = true;
+                        if (loadTimeout) clearTimeout(loadTimeout);
                         errorDisplay.style.display = 'none';
                     }
                 });
@@ -129,10 +161,18 @@
                     console.error('Video error code:', video.error ? video.error.code : 'Unknown');
                     console.error('Video error message:', video.error ? video.error.message : 'Unknown');
                     console.error('Media path being loaded:', mediaPath);
+                    if (loadTimeout) clearTimeout(loadTimeout);
+                    
                     if (!hasLoaded) {
-                        video.style.display = 'none';
-                        errorDisplay.style.display = 'block';
-                        errorDisplay.textContent = `Failed to load video: ${video.error ? video.error.message : 'Unknown error'}`;
+                        if (loadAttempts < maxAttempts) {
+                            console.log('Retrying video load...');
+                            video.remove();
+                            setTimeout(attemptLoad, 2000);
+                        } else {
+                            video.style.display = 'none';
+                            errorDisplay.style.display = 'block';
+                            errorDisplay.textContent = `Failed to load video: ${video.error ? video.error.message : 'Unknown error'}`;
+                        }
                     }
                 });
                 
@@ -143,19 +183,29 @@
                     }
                 });
                 
-                // Timeout fallback
-                setTimeout(() => {
+                // Timeout fallback with retry logic
+                loadTimeout = setTimeout(() => {
                     if (!hasLoaded && video.readyState < 2) {
                         console.error('Video loading timeout. ReadyState:', video.readyState);
                         console.error('Network state:', video.networkState);
                         console.error('Media path:', mediaPath);
-                        errorDisplay.style.display = 'block';
-                        errorDisplay.textContent = `Video loading timeout - ReadyState: ${video.readyState}, NetworkState: ${video.networkState}`;
+                        
+                        if (loadAttempts < maxAttempts) {
+                            console.log('Timeout reached, retrying...');
+                            video.remove();
+                            setTimeout(attemptLoad, 1000);
+                        } else {
+                            errorDisplay.style.display = 'block';
+                            errorDisplay.textContent = `Video loading timeout - file may not exist or be corrupted`;
+                        }
                     }
-                }, 15000); // 15 second timeout
+                }, 10000); // 10 second timeout per attempt
                 
                 container.appendChild(video);
             }
+            
+            // Start the loading process
+            attemptLoad();
         } else {
             document.getElementById('error-display').style.display = 'block';
             document.getElementById('error-display').textContent = 'No media path provided';
