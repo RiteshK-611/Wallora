@@ -31,10 +31,11 @@ fn main() {
                 if let Ok(state) = commands::load_app_state(app_handle.clone()).await {
                     // Restore wallpaper if exists
                     if let (Some(wallpaper_path), Some(file_type)) = (&state.last_wallpaper_path, &state.last_wallpaper_file_type) {
-                        let is_video = ["mp4", "webm", "avi", "mov", "mkv", "gif"].contains(&file_type.to_lowercase().as_str());
-                        
-                        if is_video {
-                            let converted_path = format!("asset://localhost/{}", urlencoding::encode(wallpaper_path));
+                        let is_video_or_gif = ["mp4", "webm", "avi", "mov", "mkv", "gif"].contains(&file_type.to_lowercase().as_str());
+
+                        if is_video_or_gif {
+                            let converted_path = format!("http://asset.localhost/{}", urlencoding::encode(wallpaper_path));
+                            
                             if let Some(app_state) = app_handle.try_state::<AppState>() {
                                 let _ = commands::create_video_wallpaper(
                                     app_handle.clone(),
