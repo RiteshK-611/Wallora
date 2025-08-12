@@ -90,7 +90,7 @@ pub async fn create_video_wallpaper(
     let path = PathBuf::from(&file_path);
     
     if !path.exists() {
-        return Err("Video file does not exist".to_string());
+        return Err(format!("Video file does not exist: {}", file_path));
     }
 
     // Create unique window label

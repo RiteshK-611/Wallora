@@ -54,7 +54,7 @@
         "language": "en-US",
         "template": null,
         "bannerPath": "src/assets/icons/bannerImg.bmp",
-        "dialogImagePath": "src/assets/icons/sidebarImg.bmp",
+        "dialogImagePath": "src/assets/icons/dialogImg.bmp",
         "fragmentPaths": [],
         "componentGroupRefs": [],
         "componentRefs": [],
@@ -87,7 +87,20 @@
       "csp": null,
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": [
+          "$RESOURCE/**/*",
+          "$TEMP/**/*",
+          "$APPDATA/**/*",
+          "$LOCALDATA/**/*",
+          "**/*.jpg",
+          "**/*.jpeg",
+          "**/*.png",
+          "**/*.webp",
+          "**/*.gif",
+          "**/*.mp4",
+          "**/*.mkv",
+          "**/*.wav"
+        ]
       }
     }
   },
