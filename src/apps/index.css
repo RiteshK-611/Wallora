@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Megrim&family=Major+Mono+Display&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Megrim&display=swap");
 
 :root {
   /* Dark theme colors to match screenshots */
@@ -160,16 +160,15 @@ body {
   transform: none;
 }
 
-.btn-ghost {
+.btn-close {
   background: transparent;
   border-color: rgba(255, 255, 255, 0.5);
   color: var(--text-secondary);
 }
 
-.btn-ghost:hover:not(:disabled) {
+.btn-close:hover:not(:disabled) {
   background: var(--accent-red);
   color: var(--text-primary);
-  font-weight: 500;
 }
 
 .btn-icon {
@@ -385,6 +384,10 @@ input:checked + .toggle-slider:before {
 }
 
 .delete-btn {
+  color: var(--text-primary);
+}
+
+.delete-btn:hover {
   color: var(--accent-red);
 }
 

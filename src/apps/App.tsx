@@ -10,6 +10,7 @@ import {
 import "./index.css";
 import { BsCalendar2Date } from "react-icons/bs";
 import { LuWallpaper } from "react-icons/lu";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 function App() {
   const [activeTab, setActiveTab] = useState<"wallpaper" | "datewidget">(
@@ -25,6 +26,8 @@ function App() {
       pauseOnFullscreen: true,
     }
   );
+
+  const logoSrc = convertFileSrc("src/assets/icons/wallora.png");
 
   const [dateWidgetSettings, setDateWidgetSettings] =
     useState<DateWidgetSettings>({
@@ -121,7 +124,7 @@ function App() {
         <div className="header-left">
           <div style={{ display: "flex", alignItems: "center" }}>
             <img
-              src="src/assets/icons/wallora.png"
+              src={logoSrc}
               alt="Wallora Logo"
               style={{ width: "36px", height: "36px" }}
             />
@@ -137,8 +140,7 @@ function App() {
             />
             <span>Auto-start</span>
           </label>
-          <button onClick={hideWindow} className="btn btn-ghost">
-            {/* <span className="btn-icon">−</span> */}
+          <button onClick={hideWindow} className="btn btn-close">
             Close
           </button>
         </div>
@@ -148,16 +150,12 @@ function App() {
         <button
           className={`tab-button ${activeTab === "wallpaper" ? "active" : ""}`}
           onClick={() => setActiveTab("wallpaper")}>
-          {/* <span className="tab-icon">
-          </span> */}
           <LuWallpaper className="tab-icon" />
           Wallpaper Manager
         </button>
         <button
           className={`tab-button ${activeTab === "datewidget" ? "active" : ""}`}
           onClick={() => setActiveTab("datewidget")}>
-          {/* <span className="tab-icon">
-          </span> */}
           <BsCalendar2Date className="tab-icon" />
           Date Widget
         </button>

@@ -20,7 +20,7 @@
     "longDescription": "Wallora is a modern desktop application for managing wallpapers with support for images, videos, and GIFs. Features include auto-changing slideshows, live video wallpapers, customizable date widgets and system tray integration. Built with Tauri and React for optimal performance.",
     "homepage": "https://github.com/riteshk-611/wallora",
     "licenseFile": "./LICENSE",
-    "resources": ["src/assets/icons/wallora.png"],
+    "resources": [],
     "externalBin": [],
     "createUpdaterArtifacts": false,
     "windows": {
