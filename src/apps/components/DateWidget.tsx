@@ -20,8 +20,8 @@ const DateWidget: React.FC<DateWidgetProps> = ({
   const fontOptions: FontOption[] = [
     { name: "Megrim", value: "Megrim", type: "google" },
     { name: "Major Mono Display", value: "Major Mono Display", type: "google" },
-    { name: "Lment v02", value: "Lment-v02", type: "local" },
-    { name: "Kapiler Regular", value: "Kapiler-Regular", type: "local" },
+    { name: "Sankofa Display", value: "Sankofa Display", type: "google" },
+    { name: "Macondo", value: "Macondo", type: "google" },
     { name: "Arial", value: "Arial", type: "local" },
     { name: "Times New Roman", value: "Times New Roman", type: "local" },
   ];
