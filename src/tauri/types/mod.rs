@@ -20,6 +20,8 @@ pub struct DateWidgetSettings {
     pub alignment: String,
     pub position_x: f64,
     pub position_y: f64,
+    pub center_x: f64,
+    pub center_y: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]

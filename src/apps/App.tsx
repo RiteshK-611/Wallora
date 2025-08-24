@@ -41,6 +41,8 @@ function App() {
       alignment: "center",
       position_x: 100,
       position_y: 100,
+      center_x: 400,
+      center_y: 300,
     });
 
   // Load persistent state on app startup

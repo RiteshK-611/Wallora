@@ -5,12 +5,13 @@ use tauri::{
 };
 use crate::state::AppState;
 use crate::commands::stop_video_wallpaper;
+use crate::commands::date_widget::center_to_position;
 use crate::types::DateWidgetSettings;
 
 pub fn create_tray_menu(app: &tauri::App) -> tauri::Result<()> {
     // Create tray menu
-    let show = MenuItem::with_id(app, "show", "Show Window", true, None::<&str>)?;
-    let hide = MenuItem::with_id(app, "hide", "Hide Window", true, None::<&str>)?;
+    let show = MenuItem::with_id(app, "show", "Show Settings", true, None::<&str>)?;
+    let hide = MenuItem::with_id(app, "hide", "Hide Settings", true, None::<&str>)?;
     let stop_video = MenuItem::with_id(app, "stop_video", "Stop Video Wallpaper", true, None::<&str>)?;
     let date_widget = MenuItem::with_id(app, "date_widget", "Toggle Date Widget", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -56,6 +57,10 @@ fn handle_tray_menu_event(app: &AppHandle<Wry>, event_id: &str) {
             let app_clone = app.clone();
             tauri::async_runtime::spawn(async move {
                 if let Some(state) = app_clone.try_state::<AppState>() {
+                    let default_center_x = 400.0; // Default center X
+                    let default_center_y = 300.0; // Default center Y
+                    let (pos_x, pos_y) = center_to_position(default_center_x, default_center_y);
+
                     // Create default settings for tray toggle
                     let default_settings = DateWidgetSettings {
                         enabled: true,
@@ -66,8 +71,10 @@ fn handle_tray_menu_event(app: &AppHandle<Wry>, event_id: &str) {
                         color: "#FFFFFF".to_string(),
                         font: "Megrim".to_string(),
                         alignment: "center".to_string(),
-                        position_x: 100.0,
-                        position_y: 100.0,
+                        position_x: pos_x,
+                        position_y: pos_y,
+                        center_x: default_center_x,
+                        center_y: default_center_y
                     };
                     let _ = crate::commands::create_date_widget(app_clone.clone(), state, default_settings).await;
                 }

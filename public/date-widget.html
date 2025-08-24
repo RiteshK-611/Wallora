@@ -9,7 +9,9 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Megrim&family=Major+Mono+Display&display=swap"
       rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Sankofa+Display&family=Macondo&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sankofa+Display&family=Macondo&display=swap"
+      rel="stylesheet" />
     <style>
       * {
         margin: 0;
@@ -19,13 +21,14 @@
 
       html,
       body {
-        width: 670px;
-        height: 250px;
-        background: transparent !important;
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         overflow: hidden;
-        font-family: "Arial", sans-serif;
-        user-select: none;
-        -webkit-user-select: none;
       }
 
       .widget-container {
@@ -242,7 +245,7 @@
             dateText.setAttribute("data-tauri-drag-region", "");
             timeText.setAttribute("data-tauri-drag-region", "");
           }
-          container.style.cursor = "move";
+          container.style.cursor = "default";
         }
 
         // Show/hide time
