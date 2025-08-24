@@ -23,6 +23,8 @@ export interface DateWidgetSettings {
   alignment: 'left' | 'center' | 'right';
   position_x: number;
   position_y: number;
+  center_x: number;
+  center_y: number;
 }
 
 export interface AppPersistentState {
