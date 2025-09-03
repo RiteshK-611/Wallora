@@ -12,7 +12,7 @@
   "bundle": {
     "active": true,
     "targets": ["nsis", "msi"],
-    "icon": ["src/assets/icons/wallora.ico", "src/assets/icons/wallora.png"],
+    "icon": ["assets/wallora.ico", "assets/wallora.png"],
     "category": "Utility",
     "publisher": "Ritesh Kokam",
     "copyright": "Copyright © 2025 Ritesh Kokam. All rights reserved.",
@@ -26,15 +26,15 @@
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper", 
-        "silent": true
+        "silent": false
       },
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
       "timestampUrl": "",
       "nsis": {
-        "installerIcon": "src/assets/icons/wallora.ico",
-        "headerImage": "src/assets/icons/headerImg.bmp",
-        "sidebarImage": "src/assets/icons/sidebarImg.bmp",
+        "installerIcon": "assets/wallora.ico",
+        "headerImage": "assets/headerImg.bmp",
+        "sidebarImage": "assets/sidebarImg.bmp",
         "startMenuFolder": "Wallora",
         "installMode": "perMachine",
         "displayLanguageSelector": true,
@@ -53,8 +53,8 @@
       "wix": {
         "language": "en-US",
         "template": null,
-        "bannerPath": "src/assets/icons/bannerImg.bmp",
-        "dialogImagePath": "src/assets/icons/dialogImg.bmp",
+        "bannerPath": "assets/bannerImg.bmp",
+        "dialogImagePath": "assets/dialogImg.bmp",
         "fragmentPaths": [],
         "componentGroupRefs": [],
         "componentRefs": [],
@@ -95,6 +95,7 @@
           "**/*.jpg",
           "**/*.jpeg",
           "**/*.png",
+          "**/*.bmp",
           "**/*.webp",
           "**/*.gif",
           "**/*.mp4",

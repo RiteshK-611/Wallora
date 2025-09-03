@@ -16,6 +16,17 @@ fn main() {
     let app_state = AppState::default();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
+            // This callback is called when a second instance is attempted
+            println!("Second instance detected with args: {:?}, cwd: {:?}", args, cwd);
+            
+            // Focus the existing main window
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+                let _ = window.unminimize();
+            }
+        }))
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())

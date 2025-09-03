@@ -10,7 +10,6 @@ import {
 import "./index.css";
 import { BsCalendar2Date } from "react-icons/bs";
 import { LuWallpaper } from "react-icons/lu";
-import { convertFileSrc } from "@tauri-apps/api/core";
 
 function App() {
   const [activeTab, setActiveTab] = useState<"wallpaper" | "datewidget">(
@@ -26,8 +25,6 @@ function App() {
       pauseOnFullscreen: true,
     }
   );
-
-  const logoSrc = convertFileSrc("src/assets/icons/wallora.png");
 
   const [dateWidgetSettings, setDateWidgetSettings] =
     useState<DateWidgetSettings>({
@@ -126,7 +123,7 @@ function App() {
         <div className="header-left">
           <div style={{ display: "flex", alignItems: "center" }}>
             <img
-              src={logoSrc}
+              src="/wallora.png"
               alt="Wallora Logo"
               style={{ width: "36px", height: "36px" }}
             />
