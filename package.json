@@ -1,7 +1,7 @@
 {
   "name": "wallora",
   "private": true,
-  "version": "1.3.2",
+  "version": "1.3.3",
   "type": "module",
   "description": "Wallora brings beautiful wallpapers and a clock overlay to your desktop.",
   "author": {
